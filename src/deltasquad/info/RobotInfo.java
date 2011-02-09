@@ -331,7 +331,7 @@ public class RobotInfo implements Cloneable, Serializable {
     * @return the angle to the coordinates
     */
    public final double angle(final double x, final double y) {
-      double theta = Utils.atan2(x - this.getX(), y - this.getY());
+      double theta = Utils.atan2d(x - this.getX(), y - this.getY());
       return Utils.relative(theta);
    }
 

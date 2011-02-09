@@ -7,6 +7,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
 import robocode.Event;
+import robocode.HitObstacleEvent;
 import CTFApi.CaptureTheFlagApi;
 import deltasquad.graphics.RGraphics;
 import deltasquad.info.RobotInfo;
@@ -57,9 +58,9 @@ public class MinimumRiskPoint {
    }
 
    public void inEvent(Event e) {
-      // if (e instanceof HitObstacleEvent) {
-      // oldPosition = nextPosition;
-      // }
+      if (e instanceof HitObstacleEvent) {
+         oldPosition = nextPosition;
+      }
    }
 
    public Point2D getPoint(RobotData[] robots, VirtualBullet[] teammateBullets) {
@@ -145,7 +146,7 @@ public class MinimumRiskPoint {
                double robotRisk = BOT_RISK;
                if (!(r instanceof TeammateData)) {
                   robotRisk += r.getEnergy();
-                  robotRisk *= (1 + Math.abs(Utils.cos(angle - Utils.angle(myX, myY, r.getX(), r.getY()))));
+                  robotRisk *= (1 + Math.abs(Utils.cosd(angle - Utils.angle(myX, myY, r.getX(), r.getY()))));
                }
 
                robotRisk /= Utils.distSq(point, r.getX(), r.getY());
@@ -167,7 +168,7 @@ public class MinimumRiskPoint {
 
 
       if (oldPosition != null) {
-         double oldPointRisk = 200.0;
+         double oldPointRisk = 400.0;
          oldPointRisk /= point.distanceSq(oldPosition);
          pointRisk += oldPointRisk;
       }
@@ -193,7 +194,7 @@ public class MinimumRiskPoint {
 
 
 
-      RGraphics grid = new RGraphics(robot.getGraphics(), robot);
+      // RGraphics grid = new RGraphics(robot.getGraphics(), robot);
 
       // grid.setColor(Color.RED);
       // if (!objects.blocked(path))
@@ -205,10 +206,10 @@ public class MinimumRiskPoint {
       // grid.draw(cornerPaths[2]);
       // grid.draw(cornerPaths[3]);
 
-      grid.setColor(Color.RED);
-      if (!objects.blocked(destination))
-         grid.setColor(Color.GREEN);
-      grid.draw(destination);
+      // grid.setColor(Color.RED);
+      // if (!objects.blocked(destination))
+      // grid.setColor(Color.GREEN);
+      // grid.draw(destination);
 
       // grid.setColor(Color.RED);
       // if (!objects.blocked(me))

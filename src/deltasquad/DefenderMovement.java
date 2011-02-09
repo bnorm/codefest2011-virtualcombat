@@ -6,7 +6,6 @@ import java.io.IOException;
 import robocode.Event;
 import robocode.HitObjectEvent;
 import robocode.MessageEvent;
-
 import CTFApi.CaptureTheFlagApi;
 import deltasquad.object.ObjectManager;
 import deltasquad.robot.RobotData;
@@ -24,16 +23,9 @@ public class DefenderMovement extends MinimumRiskPoint {
 
    @Override
    public double distSq(RobotData[] robots) {
-
       double x = robot.getEnemyBase().getCenterX();
       double y = robot.getEnemyBase().getCenterY();
 
-      // Line2D path = new Line2D.Double(robot.getX(), robot.getY(), x, y);
-      // if (objects.blocked(path)) {
-      // return Math.min(super.distSq(robots), 9 * info.distSq(x, y));
-      // } else {
-      // return Math.min(super.distSq(robots), info.distSq(x, y));
-      // }
       if (robot.isOwnFlagAtBase()) {
          return super.distSq(robots);
       } else {
@@ -61,11 +53,7 @@ public class DefenderMovement extends MinimumRiskPoint {
          risk += 100 / point.distanceSq(robot.getEnemyFlag());
          risk += -1000 / point.distance(robot.getOwnFlag());
       } else {
-         if (info.distSq(x, y) < Utils.sqr(300)) {
-            risk = -100;
-         } else {
-            risk += -200 / point.distance(x, y);
-         }
+         risk += -200 / (point.distanceSq(x, y) - Utils.sqr(300));
       }
 
       return risk + super.risk(point, angle, robots, teammateBullets);
