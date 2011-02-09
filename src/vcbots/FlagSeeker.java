@@ -5,8 +5,9 @@ import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
-import kid.graphics.RGraphics;
-import kid.management.ObjectManager;
+import deltasquad.graphics.RGraphics;
+import deltasquad.object.ObjectManager;
+
 
 import robocode.HitByBulletEvent;
 import robocode.HitObjectEvent;
