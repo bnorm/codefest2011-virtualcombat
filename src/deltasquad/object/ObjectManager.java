@@ -152,18 +152,17 @@ public class ObjectManager implements Drawable {
 
    @Override
    public void draw(RGraphics grid) {
-      // System.out.println("Points: " + points_.size() + " Edges: " + edges_.size() + " Corners: " + corners_.size());
-      // for (BoxEdge e : edges_) {
-      // grid.setColor(Color.BLUE);
-      // grid.drawLine(e.getX1(), e.getY1(), e.getX2(), e.getY2());
-      // grid.setColor(Color.RED);
-      // grid.fillOvalCenter(e.start.x_, e.start.y_, 4, 4);
-      // grid.fillOvalCenter(e.end.x_, e.end.y_, 4, 4);
-      // }
-      // grid.setColor(Color.GREEN);
-      // for (BoxPoint e : points_) {
-      // grid.fillOvalCenter(e.x_, e.y_, 4, 4);
-      // }
+      for (BoxEdge e : edges_) {
+         grid.setColor(Color.BLUE);
+         grid.drawLine(e.getX1(), e.getY1(), e.getX2(), e.getY2());
+         grid.setColor(Color.RED);
+         grid.fillOvalCenter(e.start.x_, e.start.y_, 4, 4);
+         grid.fillOvalCenter(e.end.x_, e.end.y_, 4, 4);
+      }
+      grid.setColor(Color.GREEN);
+      for (BoxPoint e : points_) {
+         grid.fillOvalCenter(e.x_, e.y_, 4, 4);
+      }
       grid.setColor(Color.WHITE);
       grid.drawString("" + edges_.size(), 20, 20);
       grid.drawString("" + points_.size(), 40, 20);

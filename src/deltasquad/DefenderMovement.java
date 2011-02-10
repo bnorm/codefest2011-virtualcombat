@@ -38,23 +38,24 @@ public class DefenderMovement extends MinimumRiskPoint {
       // double flag = -500;
       // double base = flag;
       double risk = 0;
-      double x = robot.getEnemyBase().getCenterX();
-      double y = robot.getEnemyBase().getCenterY();
-      if (captured_) {
-         x = robot.getOwnBase().getCenterX();
-         y = robot.getOwnBase().getCenterY();
-      }
+      // double x = robot.getEnemyBase().getCenterX();
+      // double y = robot.getEnemyBase().getCenterY();
+      // if (captured_) {
+      // x = robot.getOwnBase().getCenterX();
+      // y = robot.getOwnBase().getCenterY();
+      // }
       // double myX = info.getX();
       // double myY = info.getY();
 
       // risk /= point.distance(x, y);
       // Line2D path = new Line2D.Double(point.getX(), point.getY(), x, y);
       if (!robot.isOwnFlagAtBase() && !captured_) {
-         risk += 100 / point.distanceSq(robot.getEnemyFlag());
-         risk += -1000 / point.distance(robot.getOwnFlag());
-      } else {
-         risk += -200 / (point.distanceSq(x, y) - Utils.sqr(300));
+         risk += 300 / point.distanceSq(robot.getEnemyFlag());
+         risk += -500 / point.distance(robot.getOwnFlag());
       }
+      // else {
+      // risk += -200 / (point.distanceSq(x, y) - Utils.sqr(300));
+      // }
 
       return risk + super.risk(point, angle, robots, teammateBullets);
    }

@@ -26,12 +26,14 @@ public class SeekerMovement extends MinimumRiskPoint {
          x = robot.getOwnBase().getCenterX();
          y = robot.getOwnBase().getCenterY();
       }
+      double dist = super.distSq(robots);
       Line2D path = new Line2D.Double(robot.getX(), robot.getY(), x, y);
-      if (objects.blocked(path)) {
-         return Math.min(super.distSq(robots), 9 * info.distSq(x, y));
-      } else {
-         return Math.min(super.distSq(robots), info.distSq(x, y));
+      if (!objects.blocked(path)) {
+         // return Math.min(super.distSq(robots), 9 * info.distSq(x, y));
+         // } else {
+         return Math.min(dist, info.distSq(x, y));
       }
+      return dist;
    }
 
    @Override
