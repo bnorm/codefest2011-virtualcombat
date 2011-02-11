@@ -4,35 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
-import java.awt.geom.RoundRectangle2D;
-import java.util.Arrays;
-
-import deltasquad.communication.RobotMessage;
-import deltasquad.communication.ScannedRobotMessage;
-import deltasquad.data.RobotChooser;
-import deltasquad.graphics.Colors;
-import deltasquad.graphics.DrawMenu;
-import deltasquad.graphics.RGraphics;
-import deltasquad.info.RobotInfo;
-import deltasquad.management.RobotManager;
-import deltasquad.management.TargetingManager;
-import deltasquad.management.TeamManager;
-import deltasquad.movement.gun.GunMovement;
-import deltasquad.movement.radar.RadarMovement;
-import deltasquad.movement.robot.RobotMovement;
-import deltasquad.object.ObjectManager;
-import deltasquad.robot.EnemyData;
-import deltasquad.robot.RobotData;
-import deltasquad.robot.TeammateData;
-import deltasquad.targeting.CircularTargeting;
-import deltasquad.targeting.HeadOnTargeting;
-import deltasquad.targeting.LinearTargeting;
-import deltasquad.targeting.Targeting;
-import deltasquad.utils.Utils;
-import deltasquad.virtual.VirtualBullet;
-import deltasquad.virtual.VirtualGun;
 
 import robocode.BulletHitBulletEvent;
 import robocode.BulletHitEvent;
@@ -47,6 +18,24 @@ import robocode.ScannedRobotEvent;
 import robocode.SkippedTurnEvent;
 import robocode.WinEvent;
 import CTFApi.CaptureTheFlagApi;
+import deltasquad.communication.RobotMessage;
+import deltasquad.communication.ScannedRobotMessage;
+import deltasquad.graphics.DrawMenu;
+import deltasquad.graphics.RGraphics;
+import deltasquad.management.RobotManager;
+import deltasquad.management.TargetingManager;
+import deltasquad.management.TeamManager;
+import deltasquad.movement.gun.GunMovement;
+import deltasquad.movement.radar.RadarMovement;
+import deltasquad.object.ObjectManager;
+import deltasquad.robot.EnemyData;
+import deltasquad.robot.TeammateData;
+import deltasquad.targeting.CircularTargeting;
+import deltasquad.targeting.HeadOnTargeting;
+import deltasquad.targeting.LinearTargeting;
+import deltasquad.targeting.Targeting;
+import deltasquad.utils.Utils;
+import deltasquad.virtual.VirtualGun;
 
 /**
  * <p>
@@ -64,48 +53,63 @@ import CTFApi.CaptureTheFlagApi;
  */
 public class DeltaSquadBase extends CaptureTheFlagApi {
 
-   // private MinimumRiskPoint melee;
-   private RadarMovement    radar;
-   private GunMovement      gun;
+   public boolean          roundEnded = false;
 
-   private RobotManager     robots;
-   private TargetingManager targeting;
+   public RobotManager     robots;
+   public ObjectManager    objects;
+   public TeamManager      team;
+   public RadarMovement    radar;
+   public GunMovement      gun;
 
-   private ObjectManager    objects;
-   private TeamManager      team;
+   public boolean          wasSeeker  = false;
+   public MinimumRiskPoint movement;
+   public SeekerMovement   seeker;
+
+   public TargetingManager targeting;
+
+   public EnemyData        enemy      = new EnemyData();
 
    @Override
    public void run() {
       registerMe();
+      roundEnded = false;
 
-      setColors(Colors.OFF_ORANGE, Colors.SILVER, Colors.VISER_BLUE);
-      initMove();
-
-      objects = new ObjectManager(this);
-      team = new TeamManager(this);
-
-      setColors(Colors.DARK_RED, Colors.SILVER, Colors.DIRT_GREEN);
       setAdjustGunForRobotTurn(true);
       setAdjustRadarForGunTurn(true);
+      setColors(Color.BLUE, Color.BLUE, Color.BLUE);
 
       Targeting[] targetings = { new HeadOnTargeting(this), new LinearTargeting(this), new LinearTargeting(this, true),
             new CircularTargeting(this), new CircularTargeting(this, false, true),
             new CircularTargeting(this, true, false), new CircularTargeting(this, true, true) };
 
       robots = new RobotManager(this);
-      targeting = new TargetingManager(this, targetings);
+      objects = new ObjectManager(this);
+      team = new TeamManager(this);
 
-      // melee = new MinimumRiskPoint(this, objects);
       radar = new RadarMovement(this);
       gun = new GunMovement(this);
+      movement = new DefenderMovement(this, objects);
+      seeker = new SeekerMovement(this, objects);
+
+      targeting = new TargetingManager(this, targetings);
 
       while (true) {
          UpdateBattlefieldState(getBattlefieldState());
-         EnemyData enemy = robots.getEnemy(RobotChooser.CLOSEST);
+         // enemy = robots.getEnemy(RobotChooser.CLOSEST);
+         enemy = getEnemy();
 
-         move();
+         if (isSeeker()) {
+            // if (!wasSeeker) {
+            // System.out.println("GOING FOR THE FLAG!");
+            // }
+            seeker.move(robots.getRobots(), team.getTeammateBullets());
+            wasSeeker = true;
+         } else {
+            movement.move(robots.getRobots(), team.getTeammateBullets());
+            wasSeeker = false;
+         }
 
-         setTurnRadarRight(Double.POSITIVE_INFINITY);
+         setTurnRadarRight(30); // Utils.EIGHTIETH_CIRCLE / 2 + 5);
          if (getGunHeat() < .4 || getOthers() == 1)
             radar.setSweep(enemy, Utils.EIGHTIETH_CIRCLE / 3);
 
@@ -121,6 +125,41 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
 
          execute();
       }
+   }
+
+   public boolean isSeeker() {
+      if (roundEnded)
+         return wasSeeker;
+      boolean isSeeker = true;
+      double dist = getEnemyFlag().distanceSq(getX(), getY());
+      for (TeammateData t : robots.getTeammates()) {
+         if (!t.isDead() && getEnemyFlag().distanceSq(t.getX(), t.getY()) < dist) {
+            isSeeker = false;
+            break;
+         }
+      }
+      return isSeeker;
+   }
+
+   public EnemyData getEnemy() {
+      double x = getX();
+      double y = getY();
+
+      EnemyData enemy = this.enemy;
+      double distSq = Utils.distSq(x, y, enemy.getX(), enemy.getY()) * 0.9;
+
+      for (EnemyData e : robots.getEnemies()) {
+         if (!e.isDead()) {
+            double eDistDq = Utils.distSq(x, y, e.getX(), e.getY());
+            Line2D line = new Line2D.Double(x, y, e.getX(), e.getY());
+            if (eDistDq < distSq && !objects.blocked(line)) {
+               distSq = eDistDq;
+               enemy = e;
+            }
+         }
+      }
+
+      return enemy;
    }
 
    private boolean shouldFire(EnemyData enemy, double firepower) {
@@ -162,11 +201,15 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
    @Override
    public void onHitObject(HitObjectEvent e) {
       objects.inEvent(e);
+      seeker.inEvent(e);
+      movement.inEvent(e);
    }
 
    @Override
    public void onHitObstacle(HitObstacleEvent e) {
       objects.inEvent(e);
+      seeker.inEvent(e);
+      movement.inEvent(e);
    }
 
    @Override
@@ -179,10 +222,11 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
       team.inEvent(e);
       robots.inEvent(e);
       objects.inEvent(e);
+      movement.inEvent(e);
    }
 
    @Override
-   public void onPaint(final Graphics2D graphics) {
+   public void onPaint(Graphics2D graphics) {
       if (getTime() < 10)
          return;
       RGraphics grid = new RGraphics(graphics, this);
@@ -195,7 +239,7 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
    }
 
    @Override
-   public void onScannedRobot(final ScannedRobotEvent e) {
+   public void onScannedRobot(ScannedRobotEvent e) {
       team.broadcast(new ScannedRobotMessage(e, this));
       team.inEvent(e);
       robots.inEvent(e);
@@ -203,36 +247,37 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
    }
 
    @Override
-   public void onRobotDeath(final RobotDeathEvent e) {
+   public void onRobotDeath(RobotDeathEvent e) {
       robots.inEvent(e);
       targeting.inEvent(e);
    }
 
    @Override
-   public void onHitByBullet(final HitByBulletEvent e) {
+   public void onHitByBullet(HitByBulletEvent e) {
    }
 
    @Override
-   public void onBulletHit(final BulletHitEvent e) {
+   public void onBulletHit(BulletHitEvent e) {
    }
 
    @Override
-   public void onBulletHitBullet(final BulletHitBulletEvent e) {
+   public void onBulletHitBullet(BulletHitBulletEvent e) {
    }
 
    @Override
-   public void onWin(final WinEvent e) {
+   public void onWin(WinEvent e) {
       robots.inEvent(e);
+      roundEnded = true;
    }
 
    @Override
-   public void onDeath(final DeathEvent e) {
+   public void onDeath(DeathEvent e) {
       robots.inEvent(e);
       targeting.inEvent(e);
    }
 
    @Override
-   public void onMouseClicked(final MouseEvent e) {
+   public void onMouseClicked(MouseEvent e) {
       DrawMenu.inMouseEvent(e);
    }
 
@@ -244,223 +289,4 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
       out.println("SKIPPED TURN! (Time: " + e.getTime() + ", Total: " + ++SKIPPED_TURNS + ")");
    }
 
-
-
-   // *************************************************************************
-   // MOVEMENT
-   // *************************************************************************
-
-   RobotInfo                info;
-   RobotMovement            movement;
-
-   private Point2D          nextPosition;
-   private Point2D          oldPosition;
-
-   private RoundRectangle2D battleField;
-   private final double     walldist                = 40;
-   private final double     cornerarc               = 100;
-
-   private final int        NUM_OF_GENERATED_POINTS = 20;
-   private final int        CORNER_RISK             = 2;
-   private final int        BOT_RISK                = 100;
-
-   public void initMove() {
-      info = new RobotInfo(this);
-      movement = new RobotMovement(this);
-      nextPosition = new Point2D.Double(getX(), getY());
-      battleField = new RoundRectangle2D.Double(walldist, walldist, getBattleFieldWidth() - 2 * walldist,
-            getBattleFieldHeight() - 2 * walldist, cornerarc, cornerarc);
-   }
-
-   public void move() {
-      movement.setMoveToPoint(getPoint(robots.getRobots(), team.getTeammateBullets()));
-   }
-
-   public Point2D getPoint(final RobotData[] robots, final VirtualBullet[] teammateBullets) {
-      double myX = info.getX();
-      double myY = info.getY();
-      // long time = info.getTime();
-
-      double minDist = Utils.sqrt(distSq(robots));
-
-      double pointDist = Utils.distSq(nextPosition, myX, myY);
-      double pointRisk = risk(nextPosition, robots, teammateBullets);
-      if (pointDist < Utils.sqr(20)) {
-         oldPosition = nextPosition;
-      }
-
-      double dist = Utils.random(minDist / 2, minDist);
-
-      for (double a = 0; a < Utils.CIRCLE; a += Utils.CIRCLE / NUM_OF_GENERATED_POINTS) {
-         double angle = Utils.random(a, a + Utils.CIRCLE / NUM_OF_GENERATED_POINTS);
-         Point2D point = Utils.getPoint(myX, myY, dist, angle);
-
-         if (battleField.contains(point)) {
-            double risk = risk(point, angle, robots, teammateBullets);
-            if (risk < pointRisk) {
-               nextPosition = point;
-               pointRisk = risk;
-            }
-         }
-
-      }
-      return nextPosition;
-   }
-
-   public double distSq(RobotData[] robots) {
-      double minDist = info.distSq(RobotChooser.CLOSEST.getRobot(this, Arrays.asList(robots)));
-
-      // for (VirtualBullet b : teammateBullets)
-      // minDist = Math.min(2 * Utils.distSq(myX, myY, b.getX(time),
-      // b.getY(time)), minDist);
-
-      // for (ObjectManager.Point p : objectManager.getPoints())
-      // minDist = Math.min(4.0 * Utils.distSq(myX, myY, p.x_, p.y_), minDist);
-
-      return minDist;
-   }
-
-   public double risk(final Point2D point, final RobotData[] robots, final VirtualBullet[] teammateBullets) {
-      return risk(point, info.angle(point), robots, teammateBullets);
-   }
-
-   public double risk(final Point2D point, final double angle, final RobotData[] robots,
-         final VirtualBullet[] teammateBullets) {
-      double myX = info.getX();
-      double myY = info.getY();
-      // double distSq = point.distanceSq(myX, myY);
-      long time = info.getTime();
-      double pointRisk = 0.0D;
-      Line2D path = new Line2D.Double(myX, myY, point.getX(), point.getY());
-
-      Line2D[] cornerPaths = new Line2D.Double[4];
-      double add = 16;
-      cornerPaths[0] = new Line2D.Double(myX - add, myY + add, point.getX() - add, point.getY() + add);
-      cornerPaths[1] = new Line2D.Double(myX + add, myY + add, point.getX() + add, point.getY() + add);
-      cornerPaths[2] = new Line2D.Double(myX + add, myY - add, point.getX() + add, point.getY() - add);
-      cornerPaths[3] = new Line2D.Double(myX - add, myY - add, point.getX() - add, point.getY() - add);
-      Rectangle2D destination = new Rectangle2D.Double(point.getX() - add, point.getY() - add, 2 * add, 2 * add);
-      Rectangle2D me = new Rectangle2D.Double(myX - add, myY - add, 2 * add, 2 * add);
-
-
-      for (RobotData r : robots) {
-         if (!r.isDead()) {
-            boolean intersects = path.intersects(r.getRectangle());
-            for (int i = 0; !intersects && i < 4; i++) {
-               intersects = cornerPaths[i].intersects(r.getRectangle());
-            }
-
-            if (intersects) {
-               return Double.POSITIVE_INFINITY;
-            } else {
-               double robotRisk = BOT_RISK;
-               if (!(r instanceof TeammateData)) {
-                  robotRisk += r.getEnergy();
-                  robotRisk *= (1 + Math.abs(Utils.cos(angle - Utils.angle(myX, myY, r.getX(), r.getY()))));
-
-                  // boolean amiclosest = true;
-                  // double myDist = Utils.distSq(myX, myY, r.getX(), r.getY());
-                  // for (int i = 0; i < robots.length && amiclosest; i++) {
-                  // if (!r.getName().equals(robots[i].getName()) &&
-                  // Utils.distSq(r.getX(),
-                  // r.getY(), robots[i].getX(),
-                  // robots[i].getY()) < myDist)
-                  // amiclosest = false;
-                  // }
-                  // if (amiclosest)
-                  // robotRisk *= Utils.sqr(1 + Math.abs(Utils.cos(angle -
-                  // Utils.angle(myX, myY,
-                  // r.getX(), r.getY()))));
-               }
-
-               robotRisk /= Utils.distSq(point, r.getX(), r.getY());
-               pointRisk += robotRisk;
-            }
-         }
-      }
-
-
-      // for (Edge e : objects.getEdges()) {
-      // boolean intersects = path.intersectsLine(e);
-      // if (!me.intersectsLine(e)) {
-      // for (int i = 0; !intersects && i < 4; i++) {
-      // intersects = cornerPaths[i].intersectsLine(e);
-      // }
-      // }
-      // if (intersects || destination.intersectsLine(e)) {
-      // return Double.POSITIVE_INFINITY;
-      // }
-      // }
-
-      if (objects.blocked(destination) || objects.blocked(path)) {
-         return Double.POSITIVE_INFINITY;
-      } else {
-         if (!objects.blocked(me)) {
-            for (int i = 0; i < 4; i++) {
-               if (objects.blocked(cornerPaths[i]))
-                  return Double.POSITIVE_INFINITY;
-            }
-         }
-      }
-
-
-      if (oldPosition != null) {
-         double oldPointRisk = 200.0;
-         oldPointRisk /= point.distanceSq(oldPosition);
-         pointRisk += oldPointRisk;
-      }
-
-
-      for (VirtualBullet b : teammateBullets) {
-         double bulletRisk = 10.0D;
-         double heading = b.getHeading();
-         double angleBullet = Utils.angle(myX, myY, b.getX(time), b.getY(time));
-         if (Math.abs(angleBullet - heading) < Utils.maxEscapeAngle(b.getVelocity())) {
-            bulletRisk /= Utils.sqr(Utils.distSq(point, b.getX(time), b.getY(time)));
-            pointRisk += bulletRisk;
-         }
-      }
-
-
-      // for (ObjectManager.Point p : objectManager.getPoints()) {
-      // double objPointRisk = 10.0;
-      // if (Utils.distSq(myX, myY, p.x_, p.y_) < distSq
-      // && Math.abs(Utils.relative(Utils.angle(myX, myY, p.x_, p.y_) - angle)) < 10.0) {
-      // // objPointRisk = 10000.0;
-      // return Double.POSITIVE_INFINITY;
-      // } else {
-      // objPointRisk /= point.distanceSq(p.x_, p.y_);
-      // }
-      // pointRisk += objPointRisk;
-      // }
-
-      pointRisk += info.getOthers()
-            / Utils.distSq(point, info.getBattleFieldWidth() / 2, info.getBattleFieldHeight() / 2);
-
-      pointRisk += CORNER_RISK / Utils.distSq(point, info.getBattleFieldWidth(), info.getBattleFieldHeight());
-      pointRisk += CORNER_RISK / Utils.distSq(point, 0.0D, info.getBattleFieldHeight());
-      pointRisk += CORNER_RISK / Utils.distSq(point, 0.0D, 0.0D);
-      pointRisk += CORNER_RISK / Utils.distSq(point, info.getBattleFieldWidth(), 0.0D);
-
-
-
-      RGraphics grid = new RGraphics(this.getGraphics(), this);
-      grid.setColor(Color.RED);
-      // grid.draw(path);
-      // grid.draw(cornerPaths[0]);
-      // grid.draw(cornerPaths[1]);
-      // grid.draw(cornerPaths[2]);
-      // grid.draw(cornerPaths[3]);
-      grid.setColor(Color.RED);
-      if (!objects.blocked(destination))
-         grid.setColor(Color.GREEN);
-      grid.draw(destination);
-
-      grid.setColor(Color.RED);
-      if (!objects.blocked(me))
-         grid.setColor(Color.GREEN);
-      grid.draw(me);
-
-      return pointRisk;
-   }
 }
