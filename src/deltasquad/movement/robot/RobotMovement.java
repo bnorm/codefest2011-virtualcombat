@@ -1459,10 +1459,10 @@ public class RobotMovement {
    private static final double wallOffsetAngle(final double distFromWall, final double turnRadius) {
       double offsetAngle;
       if (turnRadius > distFromWall) {
-         offsetAngle = Utils.acosd(distFromWall / turnRadius);
+         offsetAngle = Utils.acos(distFromWall / turnRadius);
          offsetAngle = (turnRadius == 0.0D ? 0.0D : offsetAngle);
       } else {
-         offsetAngle = -Utils.acosd((2 * turnRadius - distFromWall) / turnRadius);
+         offsetAngle = -Utils.acos((2 * turnRadius - distFromWall) / turnRadius);
          offsetAngle = (distFromWall == 0.0D ? 0.0D : offsetAngle);
       }
       return offsetAngle;

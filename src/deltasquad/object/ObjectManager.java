@@ -8,31 +8,67 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.ListIterator;
 
+import deltasquad.data.Drawable;
+import deltasquad.graphics.RGraphics;
+import deltasquad.utils.Utils;
+
 import robocode.AdvancedRobot;
+import robocode.Condition;
 import robocode.Event;
 import robocode.HitObjectEvent;
 import robocode.HitObstacleEvent;
 import robocode.MessageEvent;
 import robocode.ScannedObjectEvent;
 import robocode.TeamRobot;
-import deltasquad.data.Drawable;
-import deltasquad.graphics.RGraphics;
-import deltasquad.utils.Utils;
 
 public class ObjectManager implements Drawable {
 
-   private AdvancedRobot               robot_;
+   private AdvancedRobot                  robot_;
+   // private RobotInfo info_;
+   private double                         prevRadarHeading_;
+   private double                         curRadarHeading_;
 
-   private static LinkedList<BoxPoint> points_ = new LinkedList<BoxPoint>();
-   private static LinkedList<BoxEdge>  edges_  = new LinkedList<BoxEdge>();
+   private long                           eventProcessingTime_;
+   private LinkedList<ScannedObjectEvent> currentEvents_;
+
+   private static LinkedList<Point>       points_  = new LinkedList<Point>();
+   private static LinkedList<Corner>      corners_ = new LinkedList<Corner>();
+   private static LinkedList<Edge>        edges_   = new LinkedList<Edge>();
 
    public ObjectManager(AdvancedRobot robot) {
       robot_ = robot;
+      // info_ = new RobotInfo(robot);
+
+      robot.addCustomEvent(new Condition() {
+         @Override
+         public boolean test() {
+            prevRadarHeading_ = curRadarHeading_;
+            curRadarHeading_ = robot_.getRadarHeading();
+            return false;
+         }
+      });
+      prevRadarHeading_ = robot_.getRadarHeading();
+      curRadarHeading_ = robot_.getRadarHeading();
+
+      eventProcessingTime_ = -1;
+      currentEvents_ = new LinkedList<ScannedObjectEvent>();
+   }
+
+   public LinkedList<Point> getPoints() {
+      return points_;
+   }
+
+   public LinkedList<Corner> getCorners() {
+      return corners_;
+   }
+
+   public LinkedList<Edge> getEdges() {
+      return edges_;
    }
 
    public boolean blocked(Line2D path) {
       if (path != null) {
-         for (BoxEdge e : edges_) {
+         for (Edge e : edges_) {
             if (e.intersectsLine(path)) {
                return true;
             }
@@ -43,7 +79,7 @@ public class ObjectManager implements Drawable {
 
    public boolean blocked(Rectangle2D robot) {
       if (robot != null) {
-         for (BoxEdge e : edges_) {
+         for (Edge e : edges_) {
             if (e.intersects(robot)) {
                return true;
             }
@@ -63,41 +99,65 @@ public class ObjectManager implements Drawable {
       }
    }
 
-   private void add(BoxPoint point) {
-      LinkedList<BoxEdge> nearEdges = new LinkedList<BoxEdge>();
-
-      for (BoxEdge e : edges_) {
-         if (e.contains(point)) {
-            return;
-         } else if (e.near(point)) {
-            nearEdges.add(e);
-            e.extend(point);
+   private void add(Point point) {
+      LinkedList<Point> nearPoints = new LinkedList<Point>();
+      boolean contains = false;
+      ListIterator<Point> iter = points_.listIterator();
+      while (!contains && iter.hasNext()) {
+         Point next = iter.next();
+         if (next.equals(point)) {
+            contains = true;
+         } else if (next.near(point)) {
+            nearPoints.add(next);
          }
       }
+      if (!contains) {
+         points_.add(point);
+         send(point);
 
-      ListIterator<BoxPoint> iter = points_.listIterator();
-      while (iter.hasNext()) {
-         BoxPoint p = iter.next();
-         if (p.near(point)) {
-            BoxEdge edge = new BoxEdge(point, p);
-            iter.remove();
-            // System.out.println("FAILED TO REMOVE POINT");
-            edges_.add(edge);
-            nearEdges.add(edge);
-         }
-      }
-
-      if (nearEdges.size() > 0) {
-         BoxEdge[] edges = nearEdges.toArray(new BoxEdge[nearEdges.size()]);
-         for (int i = 0; i < edges.length - 1; i++) {
-            for (int j = i + 1; j < edges.length; j++) {
-               if (edges[i].extend(edges[j])) {
-                  edges_.remove(edges[j]);
-               }
+         for (Corner c : corners_) {
+            if (c.near(point)) {
+               nearPoints.add(c);
             }
          }
-      } else if (nearEdges.size() == 0) {
-         points_.add(point);
+
+         for (Point p : nearPoints) {
+            point.nearPoints_.add(p);
+            p.nearPoints_.add(point);
+            Edge edge = new Edge(point, p);
+            edges_.add(edge);
+         }
+      }
+   }
+
+   private void add(Corner corner) {
+      LinkedList<Point> nearPoints = new LinkedList<Point>();
+      boolean contains = false;
+      ListIterator<Corner> iter = corners_.listIterator();
+      while (!contains && iter.hasNext()) {
+         Corner next = iter.next();
+         if (next.equals(corner)) {
+            contains = true;
+         } else if (next.near(corner)) {
+            nearPoints.add(next);
+         }
+      }
+      if (!contains) {
+         corners_.add(corner);
+         send(corner);
+
+         for (Point p : points_) {
+            if (p.near(corner)) {
+               nearPoints.add(p);
+            }
+         }
+
+         for (Point p : nearPoints) {
+            corner.nearPoints_.add(p);
+            p.nearPoints_.add(corner);
+            Edge edge = new Edge(corner, p);
+            edges_.add(edge);
+         }
       }
    }
 
@@ -114,14 +174,15 @@ public class ObjectManager implements Drawable {
    }
 
    private void handleHitObstacle(HitObstacleEvent e) {
-      // System.out.println("Hit Obstacle: " + e.getObstacleType());
-      // double angle = Utils.relative(robot_.getHeading() + e.getBearing());
+      System.out.println("Hit Obstacle: " + e.getObstacleType());
+      double angle = Utils.relative(robot_.getHeading() + e.getBearing());
+      double dist = 18;
       // System.out.println("From: " + angle + " To: " + Utils.normalize(angle, -45, 45));
-      // double dist = 18 / Utils.cosd(Utils.normalize(angle, -45, 45));
-      // double x = Utils.getX(robot_.getX(), dist, angle);
-      // double y = Utils.getY(robot_.getY(), dist, angle);
-      // BoxPoint point = new BoxPoint(x, y, angle);
-      // add(point);
+      double x = Utils.getX(robot_.getX(), dist, angle);
+      double y = Utils.getY(robot_.getY(), dist, angle);
+
+      Point point = new Point(x, y, angle);
+      add(point);
    }
 
    private void handleHitObject(HitObjectEvent e) {
@@ -129,42 +190,61 @@ public class ObjectManager implements Drawable {
    }
 
    private void handleScannedObject(ScannedObjectEvent e) {
+      // System.out.println("Scanned Object: " + e.getObjectType());
+      if (eventProcessingTime_ != robot_.getTime()) {
+         currentEvents_ = new LinkedList<ScannedObjectEvent>();
+         eventProcessingTime_ = robot_.getTime();
+      }
+
       if (e.getObjectType().equals("box")) {
          double angle = e.getBearing() + robot_.getHeading();
          double x = Utils.getX(robot_.getX(), e.getDistance(), angle);
          double y = Utils.getY(robot_.getY(), e.getDistance(), angle);
 
-         BoxPoint point = new BoxPoint(x, y, angle);
-         add(point);
-         send(point);
+         boolean between = Math.abs(Utils.relative(angle - prevRadarHeading_)) > 1.0
+               && Math.abs(Utils.relative(angle - curRadarHeading_)) > 1.0;
+         boolean straight = Math.abs(Math.round(angle)) % 90 == 0;
+         boolean blocked = currentEvents_.size() > 0;
 
+
+         if (between && !straight && !blocked) {
+            Corner corner = new Corner(x, y, angle);
+            add(corner);
+         } else {
+            Point point = new Point(x, y, angle);
+            add(point);
+         }
       }
+
+      currentEvents_.add(e);
    }
 
    private void handleMessage(MessageEvent e) {
       Serializable message = e.getMessage();
-      if (message instanceof BoxPoint) {
-         BoxPoint p = (BoxPoint) message;
+      if (message instanceof Point) {
+         Point p = (Point) message;
          add(p);
+      } else if (message instanceof Corner) {
+         Corner c = (Corner) message;
+         add(c);
       }
    }
 
 
    @Override
    public void draw(RGraphics grid) {
-      for (BoxEdge e : edges_) {
-         grid.setColor(Color.BLUE);
+      // System.out.println("Points: " + points_.size() + " Edges: " + edges_.size() + " Corners: " + corners_.size());
+      grid.setColor(Color.BLUE);
+      for (Edge e : edges_) {
          grid.drawLine(e.getX1(), e.getY1(), e.getX2(), e.getY2());
-         grid.setColor(Color.RED);
-         grid.fillOvalCenter(e.start.x_, e.start.y_, 4, 4);
-         grid.fillOvalCenter(e.end.x_, e.end.y_, 4, 4);
       }
       grid.setColor(Color.GREEN);
-      for (BoxPoint e : points_) {
+      for (Point e : points_) {
          grid.fillOvalCenter(e.x_, e.y_, 4, 4);
       }
-      grid.setColor(Color.WHITE);
-      grid.drawString("" + edges_.size(), 20, 20);
-      grid.drawString("" + points_.size(), 40, 20);
+      grid.setColor(Color.RED);
+      for (Corner c : corners_) {
+         grid.fillOvalCenter(c.x_, c.y_, 6, 6);
+      }
    }
 }

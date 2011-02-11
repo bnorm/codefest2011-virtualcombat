@@ -4,12 +4,14 @@ import java.awt.geom.Point2D;
 import java.util.Collection;
 import java.util.List;
 
-import robocode.Bullet;
-import robocode.Robot;
-import robocode.Rules;
+import deltasquad.data.factor.GuessFactor;
 import deltasquad.info.RobotInfo;
 import deltasquad.robot.RobotData;
 import deltasquad.virtual.VirtualWave;
+
+import robocode.Bullet;
+import robocode.Robot;
+import robocode.Rules;
 
 // TODO document class (50% complete)
 
@@ -123,7 +125,7 @@ public class Utils {
     *           - an angle in degrees.
     * @return the sine of the argument.
     */
-   public static final double sind(final double n) {
+   public static final double sin(final double n) {
       return Math.sin(toRadians(n));
    }
 
@@ -139,7 +141,7 @@ public class Utils {
     *           - an angle, in degrees.
     * @return the cosine of the argument.
     */
-   public static final double cosd(final double n) {
+   public static final double cos(final double n) {
       return Math.cos(toRadians(n));
    }
 
@@ -156,7 +158,7 @@ public class Utils {
     *           - an angle, in degrees.
     * @return the tangent of the argument.
     */
-   public static final double tand(final double n) {
+   public static final double tan(final double n) {
       return Math.tan(toRadians(n));
    }
 
@@ -174,7 +176,7 @@ public class Utils {
     *           - the value whose arc sine is to be returned.
     * @return the arc sine of the argument.
     */
-   public static final double asind(final double n) {
+   public static final double asin(final double n) {
       return fromRadians(Math.asin(n));
    }
 
@@ -191,7 +193,7 @@ public class Utils {
     *           - the value whose arc cosine is to be returned.
     * @return the arc cosine of the argument.
     */
-   public static final double acosd(final double n) {
+   public static final double acos(final double n) {
       return fromRadians(Math.acos(n));
    }
 
@@ -209,7 +211,7 @@ public class Utils {
     *           - the value whose arc tangent is to be returned.
     * @return the arc tangent of the argument.
     */
-   public static final double atand(final double n) {
+   public static final double atan(final double n) {
       return fromRadians(Math.atan(n));
    }
 
@@ -261,7 +263,7 @@ public class Utils {
     * @return the <i>theta</i> component of the point (r, <i>theta</i>) in compass coordinates that corresponds to the
     *         point (x, y) in Cartesian coordinates.
     */
-   public static final double atan2d(final double x, final double y) {
+   public static final double atan2(final double x, final double y) {
       return fromRadians(Math.atan2(x, y));
    }
 
@@ -344,7 +346,7 @@ public class Utils {
 
    // BORED documentation: method - angle(double, double)
    public static final double angle(final double deltaX, final double deltaY) {
-      return atan2d(deltaX, deltaY);
+      return atan2(deltaX, deltaY);
    }
 
    /**
@@ -431,7 +433,7 @@ public class Utils {
     * @return the rotation direction
     */
    public static final int getDirection(final double robotHeading, final double robotVelocity, final double angleToRobot) {
-      return sign(Utils.sind(robotHeading - angleToRobot) * robotVelocity);
+      return sign(Utils.sin(robotHeading - angleToRobot) * robotVelocity);
    }
 
    /**
@@ -443,7 +445,7 @@ public class Utils {
     * @return the maximum escape angle
     */
    public static final double getMaxEscapeAngle(final double firePower) {
-      return asind(Rules.MAX_VELOCITY / Rules.getBulletSpeed(firePower));
+      return asin(Rules.MAX_VELOCITY / Rules.getBulletSpeed(firePower));
    }
 
    // BORED documentation: method - distSq(double, double)
@@ -512,6 +514,14 @@ public class Utils {
       return limit(-1, angleOffset / wave.getMaxEscapeAngle(), 1) * direction;
    }
 
+   public static final double getGFDanger(GuessFactor gf, int index, int bins) {
+      return getGFDanger(gf, Utils.getGuessFactor(index, bins));
+   }
+
+   public static final double getGFDanger(GuessFactor gf, double indexGF) {
+      return Utils.limit(0.0, 10.0 / (50.0 * Utils.sqr(indexGF - gf.getGuessFactor()) + 1.0) - 4.95, 5.0);
+   }
+
    public static final int getIndex(final double guessfactor, final int listlength) {
       return round(((double) listlength - 1) / 2 * (guessfactor + 1));
    }
@@ -529,7 +539,7 @@ public class Utils {
    }
 
    public static final double getDeltaX(final double distance, final double angle) {
-      return distance * sind(angle);
+      return distance * sin(angle);
    }
 
    public static final double getY(final double y, final double distance, final double angle) {
@@ -537,7 +547,7 @@ public class Utils {
    }
 
    public static final double getDeltaY(final double distance, final double angle) {
-      return distance * cosd(angle);
+      return distance * cos(angle);
    }
 
    /**
@@ -680,7 +690,7 @@ public class Utils {
    }
 
    public static final double maxEscapeAngle(final double bulletVelocity) {
-      return Utils.asind(Rules.MAX_VELOCITY / bulletVelocity);
+      return Utils.asin(Rules.MAX_VELOCITY / bulletVelocity);
    }
 
    public static final boolean between(final double a, final double n, final double b) {
