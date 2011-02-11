@@ -1,5 +1,6 @@
 package deltasquad;
 
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 
@@ -23,10 +24,12 @@ public class DefenderMovement extends MinimumRiskPoint {
 
    @Override
    public double distSq(RobotData[] robots) {
-      double x = robot.getEnemyBase().getCenterX();
-      double y = robot.getEnemyBase().getCenterY();
+      double x = robot.getOwnFlag().getX();
+      double y = robot.getOwnFlag().getY();
 
-      if (robot.isOwnFlagAtBase()) {
+      Line2D path = new Line2D.Double(info.getX(), info.getY(), x, y);
+
+      if (captured_ || robot.isOwnFlagAtBase() || objects.blocked(path)) {
          return super.distSq(robots);
       } else {
          return Math.min(super.distSq(robots), info.distSq(x, y));
@@ -48,14 +51,11 @@ public class DefenderMovement extends MinimumRiskPoint {
       // double myY = info.getY();
 
       // risk /= point.distance(x, y);
-      // Line2D path = new Line2D.Double(point.getX(), point.getY(), x, y);
-      if (!robot.isOwnFlagAtBase() && !captured_) {
+      Line2D path = new Line2D.Double(point, robot.getEnemyFlag());
+      if (!captured_ && !robot.isOwnFlagAtBase() && !objects.blocked(path)) {
          risk += 300 / point.distanceSq(robot.getEnemyFlag());
-         risk += -500 / point.distance(robot.getOwnFlag());
+         risk += -200 / point.distance(robot.getOwnFlag());
       }
-      // else {
-      // risk += -200 / (point.distanceSq(x, y) - Utils.sqr(300));
-      // }
 
       return risk + super.risk(point, angle, robots, teammateBullets);
    }

@@ -109,7 +109,7 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
             wasSeeker = false;
          }
 
-         setTurnRadarRight(Double.POSITIVE_INFINITY);
+         setTurnRadarRight(Utils.EIGHTIETH_CIRCLE / 2);
          if (getGunHeat() < .4 || getOthers() == 1)
             radar.setSweep(enemy, Utils.EIGHTIETH_CIRCLE / 3);
 

@@ -7,6 +7,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
 import robocode.Event;
+import robocode.HitObstacleEvent;
 import CTFApi.CaptureTheFlagApi;
 import deltasquad.graphics.RGraphics;
 import deltasquad.info.RobotInfo;
@@ -57,9 +58,9 @@ public class MinimumRiskPoint {
    }
 
    public void inEvent(Event e) {
-      // if (e instanceof HitObstacleEvent) {
-      // oldPosition = nextPosition;
-      // }
+      if (e instanceof HitObstacleEvent) {
+         oldPosition = nextPosition;
+      }
    }
 
    public Point2D getPoint(RobotData[] robots, VirtualBullet[] teammateBullets) {
@@ -102,7 +103,7 @@ public class MinimumRiskPoint {
       for (RobotData r : robots) {
          Line2D path = new Line2D.Double(myX, myY, r.getX(), r.getY());
          if (!objects.blocked(path)) {
-            minDist = Math.min(info.distSq(r), minDist);
+            minDist = Math.min(2 * info.distSq(r), minDist);
          }
       }
 
@@ -121,7 +122,7 @@ public class MinimumRiskPoint {
       Line2D path = new Line2D.Double(myX, myY, point.getX(), point.getY());
 
       Line2D[] cornerPaths = new Line2D.Double[4];
-      double add = 18;
+      double add = 17;
       cornerPaths[0] = new Line2D.Double(myX - add, myY + add, point.getX() - add, point.getY() + add);
       cornerPaths[1] = new Line2D.Double(myX + add, myY + add, point.getX() + add, point.getY() + add);
       cornerPaths[2] = new Line2D.Double(myX + add, myY - add, point.getX() + add, point.getY() - add);
@@ -144,10 +145,10 @@ public class MinimumRiskPoint {
 
       for (RobotData r : robots) {
          if (!r.isDead()) {
-            Line2D sight = new Line2D.Double(point.getX(), point.getY(), r.getX(), r.getY());
-            if (objects.blocked(sight)) {
-               continue;
-            }
+            // Line2D sight = new Line2D.Double(point.getX(), point.getY(), r.getX(), r.getY());
+            // if (objects.blocked(sight)) {
+            // continue;
+            // }
             boolean intersects = path.intersects(r.getRectangle());
             for (int i = 0; !intersects && i < 4; i++) {
                intersects = cornerPaths[i].intersects(r.getRectangle());
@@ -173,7 +174,7 @@ public class MinimumRiskPoint {
 
 
       if (oldPosition != null) {
-         double oldPointRisk = 400.0;
+         double oldPointRisk = 200.0;
          oldPointRisk /= point.distanceSq(oldPosition);
          pointRisk += oldPointRisk;
       }
@@ -189,9 +190,8 @@ public class MinimumRiskPoint {
          }
       }
 
-      pointRisk += info.getOthers()
-            / Utils.distSq(point, info.getBattleFieldWidth() / 2, info.getBattleFieldHeight() / 2);
-
+      // pointRisk += info.getOthers()
+      // / Utils.distSq(point, info.getBattleFieldWidth() / 2, info.getBattleFieldHeight() / 2);
       pointRisk += CORNER_RISK / Utils.distSq(point, info.getBattleFieldWidth(), info.getBattleFieldHeight());
       pointRisk += CORNER_RISK / Utils.distSq(point, 0.0D, info.getBattleFieldHeight());
       pointRisk += CORNER_RISK / Utils.distSq(point, 0.0D, 0.0D);
