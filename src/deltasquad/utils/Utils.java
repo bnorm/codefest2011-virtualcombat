@@ -110,160 +110,167 @@ public class Utils {
       return n;
    }
 
-   /**
-    * Returns the trigonometric sine of an angle. Special cases:
-    * <ul>
-    * <li>If the argument is <code>NaN</code> or an infinity, then the result is <code>NaN</code>.
-    * <li>If the argument is zero, then the result is a zero with the same sign as the argument.
-    * </ul>
-    * <p>
-    * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
-    * 
-    * @param n
-    *           - an angle in degrees.
-    * @return the sine of the argument.
-    */
-   public static final double sind(final double n) {
-      return Math.sin(toRadians(n));
-   }
-
-   /**
-    * Returns the trigonometric cosine of an angle. Special cases:
-    * <ul>
-    * <li>If the argument is <code>NaN</code> or an infinity, then the result is <code>NaN</code>.
-    * </ul>
-    * <p>
-    * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
-    * 
-    * @param n
-    *           - an angle, in degrees.
-    * @return the cosine of the argument.
-    */
-   public static final double cosd(final double n) {
-      return Math.cos(toRadians(n));
-   }
-
-   /**
-    * Returns the trigonometric tangent of an angle. Special cases:
-    * <ul>
-    * <li>If the argument is <code>NaN</code> or an infinity, then the result is <code>NaN</code>.
-    * <li>If the argument is zero, then the result is a zero with the same sign as the argument.
-    * </ul>
-    * <p>
-    * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
-    * 
-    * @param n
-    *           - an angle, in degrees.
-    * @return the tangent of the argument.
-    */
-   public static final double tand(final double n) {
-      return Math.tan(toRadians(n));
-   }
-
-   /**
-    * Returns the arc sine of an angle, in the range of <code>-180.0</code> though <code>180.0</code>. Special case:
-    * <ul>
-    * <li>If the argument is <code>NaN</code> or its absolute value is greater than 1, then the result is
-    * <code>NaN </code>.
-    * <li>If the argument is zero, then the result is a zero with the same sign as the argument.
-    * </ul>
-    * <p>
-    * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
-    * 
-    * @param n
-    *           - the value whose arc sine is to be returned.
-    * @return the arc sine of the argument.
-    */
-   public static final double asind(final double n) {
-      return fromRadians(Math.asin(n));
-   }
-
-   /**
-    * Returns the arc cosine of an angle, in the range of <code>0.0</code> through <code>180.0</code>. Special case:
-    * <ul>
-    * <li>If the argument is <code>NaN</code> or its absolute value is greater than 1, then the result is
-    * <code>NaN </code>.
-    * </ul>
-    * <p>
-    * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
-    * 
-    * @param n
-    *           - the value whose arc cosine is to be returned.
-    * @return the arc cosine of the argument.
-    */
-   public static final double acosd(final double n) {
-      return fromRadians(Math.acos(n));
-   }
-
-   /**
-    * Returns the arc tangent of an angle, in the range of <code>-180.0</code> though <code>180.0</code>. Special case:
-    * <ul>
-    * <li>If the argument is <code>NaN</code> or its absolute value is greater than 1, then the result is
-    * <code>NaN </code>.
-    * <li>If the argument is zero, then the result is a zero with the same sign as the argument.
-    * </ul>
-    * <p>
-    * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
-    * 
-    * @param n
-    *           - the value whose arc tangent is to be returned.
-    * @return the arc tangent of the argument.
-    */
-   public static final double atand(final double n) {
-      return fromRadians(Math.atan(n));
-   }
-
-   /**
-    * Converts rectangular coordinates (x, y) to compass (r, <i>theta</i>). This method computes the phase <i>theta</i>
-    * by computing an arc tangent of x/y in the range of <code>-180.0</code> to <code>180.0</code>. Special cases:
-    * <ul>
-    * <li>If the argument is <code>NaN</code>, then the result is <code>NaN
-    * </code>.
-    * <li>If the first argument is positive and the second argument is positive zero, or the first argument is positive
-    * infinity and the second argument is positive and finite, then the result is positive zero.
-    * <li>If the first argument is positive and the second argument is negative zero, or the first argument is positive
-    * infinity and the second argument is negative and finite, then the result is negative zero.
-    * <li>If the first argument is negative and the second argument is positive zero, or the first argument is negative
-    * infinity and the second argument is positive and finite, then the result is the double value closest to
-    * <code>180.0
-    * </code>.
-    * <li>If the first argument is negative and the second argument is negative zero, or the first argument is negative
-    * infinity and the second argument is negative and finite, then the result is the double value closest to
-    * <code>-180.0</code>.
-    * <li>If the first argument is positive zero or negative zero and the second argument is positive, or the first
-    * argument is finite and the second argument is positive infinity, then the result is the double value closest to
-    * <code>90.0</code>.
-    * <li>If the first argument is positive zero or negative zero and the second argument is negative, or the first
-    * argument is finite and the second argument is negative infinity, then the result is the double value closest to
-    * <code>
-    * -90.0</code>.
-    * <li>If both arguments are positive infinity, then the result is the double value closest to <code>45.0</code>.
-    * <li>If the first argument is negative infinity and the second argument is positive infinity, then the result is
-    * the double value closest to <code>135.0
-    * </code>.
-    * <li>If the first argument is positive infinity and the second argument is negative infinity, then the result is
-    * the double value closest to <code>-45.0</code>.
-    * <li>If both arguments are negative infinity, then the result is the double value closest to <code>-135.0</code>.
-    * </ul>
-    * <p>
-    * The computed result must be within 2 ulp of the exact result. Results must be semi-monotonic.
-    * <p>
-    * Note: "compass" is the coordinate system used in Robocode and is very similar to polar but with some differences:
-    * <ul>
-    * <li>Absolute zero (0.0) is pointing north.
-    * <li>Angles increase clockwise.
-    * </ul>
-    * 
-    * @param x
-    *           - the ordinate coordinate
-    * @param y
-    *           - the abscissa coordinate
-    * @return the <i>theta</i> component of the point (r, <i>theta</i>) in compass coordinates that corresponds to the
-    *         point (x, y) in Cartesian coordinates.
-    */
-   public static final double atan2d(final double x, final double y) {
-      return fromRadians(Math.atan2(x, y));
-   }
+   // /**
+   // * // * Returns the trigonometric sine of an angle. Special cases: // *
+   // * <ul>
+   // * // *
+   // * <li>If the argument is <code>NaN</code> or an infinity, then the result is <code>NaN</code>. // *
+   // * <li>If the argument is zero, then the result is a zero with the same sign as the argument. // *
+   // * </ul>
+   // * // *
+   // * <p>
+   // * // * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic. // * // *
+   // @param
+   // * n // * - an angle in degrees. // * @return the sine of the argument. //
+   // */
+   // public static final double sind(final double n) {
+   // return Math.sin(toRadians(n));
+   // }
+   //
+   // /**
+   // * Returns the trigonometric cosine of an angle. Special cases:
+   // * <ul>
+   // * <li>If the argument is <code>NaN</code> or an infinity, then the result is <code>NaN</code>.
+   // * </ul>
+   // * <p>
+   // * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
+   // *
+   // * @param n
+   // * - an angle, in degrees.
+   // * @return the cosine of the argument.
+   // */
+   // public static final double cosd(final double n) {
+   // return Math.cos(toRadians(n));
+   // }
+   //
+   // /**
+   // * Returns the trigonometric tangent of an angle. Special cases:
+   // * <ul>
+   // * <li>If the argument is <code>NaN</code> or an infinity, then the result is <code>NaN</code>.
+   // * <li>If the argument is zero, then the result is a zero with the same sign as the argument.
+   // * </ul>
+   // * <p>
+   // * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
+   // *
+   // * @param n
+   // * - an angle, in degrees.
+   // * @return the tangent of the argument.
+   // */
+   // public static final double tand(final double n) {
+   // return Math.tan(toRadians(n));
+   // }
+   //
+   // /**
+   // * Returns the arc sine of an angle, in the range of <code>-180.0</code> though <code>180.0</code>. Special case:
+   // * <ul>
+   // * <li>If the argument is <code>NaN</code> or its absolute value is greater than 1, then the result is
+   // * <code>NaN </code>.
+   // * <li>If the argument is zero, then the result is a zero with the same sign as the argument.
+   // * </ul>
+   // * <p>
+   // * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
+   // *
+   // * @param n
+   // * - the value whose arc sine is to be returned.
+   // * @return the arc sine of the argument.
+   // */
+   // public static final double asind(final double n) {
+   // return fromRadians(Math.asin(n));
+   // }
+   //
+   // /**
+   // * Returns the arc cosine of an angle, in the range of <code>0.0</code> through <code>180.0</code>. Special case:
+   // * <ul>
+   // * <li>If the argument is <code>NaN</code> or its absolute value is greater than 1, then the result is
+   // * <code>NaN </code>.
+   // * </ul>
+   // * <p>
+   // * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
+   // *
+   // * @param n
+   // * - the value whose arc cosine is to be returned.
+   // * @return the arc cosine of the argument.
+   // */
+   // public static final double acosd(final double n) {
+   // return fromRadians(Math.acos(n));
+   // }
+   //
+   // /**
+   // * Returns the arc tangent of an angle, in the range of <code>-180.0</code> though <code>180.0</code>. Special
+   // case:
+   // * <ul>
+   // * <li>If the argument is <code>NaN</code> or its absolute value is greater than 1, then the result is
+   // * <code>NaN </code>.
+   // * <li>If the argument is zero, then the result is a zero with the same sign as the argument.
+   // * </ul>
+   // * <p>
+   // * The computed result must be within 1 ulp of the exact result. Results must be semi-monotonic.
+   // *
+   // * @param n
+   // * - the value whose arc tangent is to be returned.
+   // * @return the arc tangent of the argument.
+   // */
+   // public static final double atand(final double n) {
+   // return fromRadians(Math.atan(n));
+   // }
+   //
+   // /**
+   // * Converts rectangular coordinates (x, y) to compass (r, <i>theta</i>). This method computes the phase
+   // <i>theta</i>
+   // * by computing an arc tangent of x/y in the range of <code>-180.0</code> to <code>180.0</code>. Special cases:
+   // * <ul>
+   // * <li>If the argument is <code>NaN</code>, then the result is <code>NaN
+   // * </code>.
+   // * <li>If the first argument is positive and the second argument is positive zero, or the first argument is
+   // positive
+   // * infinity and the second argument is positive and finite, then the result is positive zero.
+   // * <li>If the first argument is positive and the second argument is negative zero, or the first argument is
+   // positive
+   // * infinity and the second argument is negative and finite, then the result is negative zero.
+   // * <li>If the first argument is negative and the second argument is positive zero, or the first argument is
+   // negative
+   // * infinity and the second argument is positive and finite, then the result is the double value closest to
+   // * <code>180.0
+   // * </code>.
+   // * <li>If the first argument is negative and the second argument is negative zero, or the first argument is
+   // negative
+   // * infinity and the second argument is negative and finite, then the result is the double value closest to
+   // * <code>-180.0</code>.
+   // * <li>If the first argument is positive zero or negative zero and the second argument is positive, or the first
+   // * argument is finite and the second argument is positive infinity, then the result is the double value closest to
+   // * <code>90.0</code>.
+   // * <li>If the first argument is positive zero or negative zero and the second argument is negative, or the first
+   // * argument is finite and the second argument is negative infinity, then the result is the double value closest to
+   // * <code>
+   // * -90.0</code>.
+   // * <li>If both arguments are positive infinity, then the result is the double value closest to <code>45.0</code>.
+   // * <li>If the first argument is negative infinity and the second argument is positive infinity, then the result is
+   // * the double value closest to <code>135.0
+   // * </code>.
+   // * <li>If the first argument is positive infinity and the second argument is negative infinity, then the result is
+   // * the double value closest to <code>-45.0</code>.
+   // * <li>If both arguments are negative infinity, then the result is the double value closest to <code>-135.0</code>.
+   // * </ul>
+   // * <p>
+   // * The computed result must be within 2 ulp of the exact result. Results must be semi-monotonic.
+   // * <p>
+   // * Note: "compass" is the coordinate system used in Robocode and is very similar to polar but with some
+   // differences:
+   // * <ul>
+   // * <li>Absolute zero (0.0) is pointing north.
+   // * <li>Angles increase clockwise.
+   // * </ul>
+   // *
+   // * @param x
+   // * - the ordinate coordinate
+   // * @param y
+   // * - the abscissa coordinate
+   // * @return the <i>theta</i> component of the point (r, <i>theta</i>) in compass coordinates that corresponds to the
+   // * point (x, y) in Cartesian coordinates.
+   // */
+   // public static final double atan2d(final double x, final double y) {
+   // return fromRadians(Math.atan2(x, y));
+   // }
 
    /**
     * Returns the average of the array to <code>double</code> precision. Special cases:
@@ -344,7 +351,7 @@ public class Utils {
 
    // BORED documentation: method - angle(double, double)
    public static final double angle(final double deltaX, final double deltaY) {
-      return atan2d(deltaX, deltaY);
+      return Trig.d_atan2(deltaX, deltaY);
    }
 
    /**
@@ -431,7 +438,7 @@ public class Utils {
     * @return the rotation direction
     */
    public static final int getDirection(final double robotHeading, final double robotVelocity, final double angleToRobot) {
-      return sign(Utils.sind(robotHeading - angleToRobot) * robotVelocity);
+      return sign(Trig.d_sin(robotHeading - angleToRobot) * robotVelocity);
    }
 
    /**
@@ -443,7 +450,7 @@ public class Utils {
     * @return the maximum escape angle
     */
    public static final double getMaxEscapeAngle(final double firePower) {
-      return asind(Rules.MAX_VELOCITY / Rules.getBulletSpeed(firePower));
+      return Trig.d_asin(Rules.MAX_VELOCITY / Rules.getBulletSpeed(firePower));
    }
 
    // BORED documentation: method - distSq(double, double)
@@ -529,7 +536,7 @@ public class Utils {
    }
 
    public static final double getDeltaX(final double distance, final double angle) {
-      return distance * sind(angle);
+      return distance * Trig.d_sin(angle);
    }
 
    public static final double getY(final double y, final double distance, final double angle) {
@@ -537,7 +544,7 @@ public class Utils {
    }
 
    public static final double getDeltaY(final double distance, final double angle) {
-      return distance * cosd(angle);
+      return distance * Trig.d_cos(angle);
    }
 
    /**
@@ -680,7 +687,7 @@ public class Utils {
    }
 
    public static final double maxEscapeAngle(final double bulletVelocity) {
-      return Utils.asind(Rules.MAX_VELOCITY / bulletVelocity);
+      return Trig.d_asin(Rules.MAX_VELOCITY / bulletVelocity);
    }
 
    public static final boolean between(final double a, final double n, final double b) {

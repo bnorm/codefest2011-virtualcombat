@@ -219,8 +219,8 @@ public class RobotData implements Cloneable, Serializable, Segmentable, Printabl
     * from its previous known position to the new position.<br>
     * <br>
     * This method should not be called directly but should be called through either
-    * <code>{@link deltasquad.robot.RobotData#update(ScannedRobotEvent, Robot) update(ScannedRobotEvent, Robot)}</code> or
-    * <code>{@link deltasquad.robot.RobotData#update(Robot) update(Robot)}</code>.
+    * <code>{@link deltasquad.robot.RobotData#update(ScannedRobotEvent, Robot) update(ScannedRobotEvent, Robot)}</code>
+    * or <code>{@link deltasquad.robot.RobotData#update(Robot) update(Robot)}</code>.
     * 
     * @param curX
     *           - the <code>x</code> component of the robot's current position.
@@ -260,8 +260,8 @@ public class RobotData implements Cloneable, Serializable, Segmentable, Printabl
     * that all deltas and averages are reset and the robot's information is all reset to the current information.<br>
     * <br>
     * This method should never be called directly but should only be called through either
-    * <code>{@link deltasquad.robot.RobotData#update(ScannedRobotEvent, Robot) update(ScannedRobotEvent, Robot)}</code> or
-    * <code>{@link deltasquad.robot.RobotData#update(Robot) update(Robot)}</code>.
+    * <code>{@link deltasquad.robot.RobotData#update(ScannedRobotEvent, Robot) update(ScannedRobotEvent, Robot)}</code>
+    * or <code>{@link deltasquad.robot.RobotData#update(Robot) update(Robot)}</code>.
     * 
     * @param curX
     *           - the <code>x</code> component of the robot's starting position.
@@ -415,6 +415,15 @@ public class RobotData implements Cloneable, Serializable, Segmentable, Printabl
    public Rectangle2D getRectangle() {
       return new Rectangle2D.Double(getX() - (RobotInfo.WIDTH / 2.0D), getY() - (RobotInfo.HEIGHT / 2.0D),
             RobotInfo.WIDTH, RobotInfo.HEIGHT);
+   }
+
+   /**
+    * Returns a <code>Rectangle2D</code> that is the height, width and at the current position of the robot.
+    * 
+    * @return the robot's <code>Rectangle</code>.
+    */
+   public Rectangle2D getRectangle(double width, double height) {
+      return new Rectangle2D.Double(getX() - (width / 2.0D), getY() - (height / 2.0D), width, height);
    }
 
    /**

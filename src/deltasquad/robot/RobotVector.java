@@ -1,40 +1,37 @@
 package deltasquad.robot;
 
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.io.PrintStream;
 import java.io.Serializable;
 
 import deltasquad.data.Drawable;
-import deltasquad.data.Printable;
-import deltasquad.graphics.Colors;
 import deltasquad.graphics.RGraphics;
+import deltasquad.utils.Trig;
 import deltasquad.utils.Utils;
-
-import robocode.RobocodeFileOutputStream;
 
 // TODO document class
 
-public class RobotVector implements Cloneable, Serializable, Printable, Drawable {
+public class RobotVector implements Cloneable, Serializable, Drawable {
 
    /**
-    * Determines if a de-serialized file is compatible with this class.<BR>
+    * Determines if a deserialized file is compatible with this class.<BR>
     * <BR>
     * Maintainers must change this value if and only if the new version of this class is not compatible with old
     * versions.
     */
    private static final long serialVersionUID = 7415604949876623460L;
 
-   private double x;
-   private double y;
-   private double deltaX;
-   private double deltaY;
-   private double heading;
-   private double velocity;
+   private double            x;
+   private double            y;
+   private double            deltaX;
+   private double            deltaY;
+   private double            heading;
+   private double            velocity;
 
-   private boolean updatedDeltaX = true;
-   private boolean updatedDeltaY = true;
-   private boolean updatedHeading = true;
-   private boolean updatedVelocity = true;
+   private boolean           updatedDeltaX    = true;
+   private boolean           updatedDeltaY    = true;
+   private boolean           updatedHeading   = true;
+   private boolean           updatedVelocity  = true;
 
    public RobotVector() {
       init(-1.0D, -1.0D, 0.0D, 0.0D);
@@ -59,10 +56,15 @@ public class RobotVector implements Cloneable, Serializable, Printable, Drawable
    private void init(final double x, final double y, final double heading, final double velocity) {
       this.x = x;
       this.y = y;
-      this.deltaX = Utils.getDeltaX(velocity, heading);
-      this.deltaY = Utils.getDeltaY(velocity, heading);
+      // this.deltaX = Utils.getDeltaX(velocity, heading);
+      // this.deltaY = Utils.getDeltaY(velocity, heading);
       this.heading = heading;
       this.velocity = velocity;
+
+      updatedDeltaX = false;
+      updatedDeltaY = false;
+      updatedHeading = true;
+      updatedVelocity = true;
    }
 
    public double getX() {
@@ -74,72 +76,77 @@ public class RobotVector implements Cloneable, Serializable, Printable, Drawable
    }
 
    public double getDeltaX() {
-      if (!updatedDeltaX)
-         deltaX = Utils.getDeltaX(getVelocity(), getHeading());
-      updatedDeltaX = true;
+      if (!updatedDeltaX) {
+         deltaX = getVelocity() * Trig.d_sin(getHeading());
+         updatedDeltaX = true;
+      }
       return deltaX;
    }
 
    public double getDeltaY() {
-      if (!updatedDeltaY)
-         deltaY = Utils.getDeltaY(getVelocity(), getHeading());
-      updatedDeltaY = true;
+      if (!updatedDeltaY) {
+         deltaY = getVelocity() * Trig.d_cos(getHeading());
+         updatedDeltaY = true;
+      }
       return deltaY;
    }
 
    public double getHeading() {
-      if (!updatedHeading)
-         heading = Utils.angle(0.0D, 0.0D, getDeltaX(), getDeltaY());
-      updatedHeading = true;
+      if (!updatedHeading) {
+         heading = Trig.d_atan2(getDeltaX(), getDeltaY());
+         updatedHeading = true;
+      }
       return heading;
    }
 
    public double getVelocity() {
-      if (!updatedVelocity)
-         velocity = Utils.dist(0.0D, 0.0D, getDeltaX(), getDeltaY());
-      updatedVelocity = true;
+      if (!updatedVelocity) {
+         velocity = Utils.sqrt(Utils.sqr(getDeltaX()) + Utils.sqr(getDeltaY()));
+         updatedVelocity = true;
+      }
       return velocity;
    }
 
-   public void add(final RobotVector vector) {
+   public RobotVector add(RobotVector vector) {
       deltaX += vector.getDeltaX();
       deltaY += vector.getDeltaY();
       updatedHeading = false;
       updatedVelocity = false;
+      return this;
    }
 
-   public void rotate(final double turn) {
+   public RobotVector rotate(double turn) {
       this.heading = getHeading() + turn;
       updatedDeltaX = false;
       updatedDeltaY = false;
+      return this;
    }
 
-   public void velocity(final double newVelocity) {
+   public RobotVector velocity(double newVelocity) {
+      // if (newVelocity == getVelocity() || newVelocity > Rules.MAX_VELOCITY || newVelocity < -Rules.MAX_VELOCITY) {
+      // return this;
+      // }
       this.velocity = newVelocity;
       updatedDeltaX = false;
       updatedDeltaY = false;
+      return this;
    }
 
-   public static void add(final Point2D point, final RobotVector vector) {
+   public static void add(Point2D point, RobotVector vector) {
       point.setLocation(point.getX() + vector.getDeltaX(), point.getY() + vector.getDeltaY());
    }
 
    public RobotVector startNew() {
-      return new RobotVector(getX() + getDeltaX(), getY() + getDeltaY(), getHeading(), 0.0D);
+      return new RobotVector(getX() + getDeltaX(), getY() + getDeltaY(), getHeading(), getVelocity());
    }
 
-   public void print(final PrintStream console) {
-      // TODO Method Stub
+   public Line2D getLine() {
+      return new Line2D.Double(getX(), getY(), getX() + getDeltaX(), getY() + getDeltaY());
    }
 
-   public void print(final RobocodeFileOutputStream output) {
-      // TODO Method Stub
-   }
-
-   public void draw(final RGraphics grid) {
+   public void draw(RGraphics grid) {
       if (getX() > 0.0D && getY() > 0.0D) {
-         grid.setColor(Colors.DIRT_GREEN);
-         grid.drawLine(getX(), getY(), getX() + getDeltaX(), getY() + getDeltaY());
+         grid.draw(getLine());
       }
    }
 
@@ -152,20 +159,10 @@ public class RobotVector implements Cloneable, Serializable, Printable, Drawable
    public boolean equals(final Object obj) {
       if (obj instanceof RobotVector) {
          RobotVector vector = (RobotVector) obj;
-         return (vector.getDeltaX() == getDeltaX()) && (vector.getDeltaY() == getDeltaY()) && (vector.getX() == getX()) && (vector.getY() == getY());
+         return (vector.getDeltaX() == getDeltaX()) && (vector.getDeltaY() == getDeltaY()) && (vector.getX() == getX())
+               && (vector.getY() == getY());
       }
       return false;
-   }
-
-   @Override
-   public String toString() {
-      // TODO Method Stub
-      return new String();
-   }
-
-   @Override
-   public void finalize() {
-      // TODO Method Stub
    }
 
 }

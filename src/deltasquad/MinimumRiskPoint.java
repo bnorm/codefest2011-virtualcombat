@@ -3,7 +3,6 @@ package deltasquad;
 import java.awt.Color;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.Arrays;
 
@@ -17,6 +16,7 @@ import deltasquad.movement.robot.RobotMovement;
 import deltasquad.object.ObjectManager;
 import deltasquad.robot.RobotData;
 import deltasquad.robot.TeammateData;
+import deltasquad.utils.Trig;
 import deltasquad.utils.Utils;
 import deltasquad.virtual.VirtualBullet;
 
@@ -34,7 +34,7 @@ public class MinimumRiskPoint {
    protected final double      walldist                = 20;
    protected final double      cornerarc               = 50;
 
-   protected final int         NUM_OF_GENERATED_POINTS = 40;
+   protected final int         NUM_OF_GENERATED_POINTS = 20;
    protected final int         CORNER_RISK             = 2;
    protected final int         BOT_RISK                = 100;
 
@@ -120,29 +120,18 @@ public class MinimumRiskPoint {
       double myX = info.getX();
       double myY = info.getY();
       long time = info.getTime();
-      double pointRisk = 0.0D;
+      double pointRisk = 0.0;
       Line2D path = new Line2D.Double(myX, myY, point.getX(), point.getY());
 
-      Line2D[] cornerPaths = new Line2D.Double[4];
-      double addM = 16;
-      double addD = 20;
-      cornerPaths[0] = new Line2D.Double(myX - addM, myY + addM, point.getX() - addD, point.getY() + addD);
-      cornerPaths[1] = new Line2D.Double(myX + addM, myY + addM, point.getX() + addD, point.getY() + addD);
-      cornerPaths[2] = new Line2D.Double(myX + addM, myY - addM, point.getX() + addD, point.getY() - addD);
-      cornerPaths[3] = new Line2D.Double(myX - addM, myY - addM, point.getX() - addD, point.getY() - addD);
-      Rectangle2D destination = new Rectangle2D.Double(point.getX() - addD, point.getY() - addD, 2 * addD, 2 * addD);
-      Rectangle2D me = new Rectangle2D.Double(myX - addM, myY - addM, 2 * addM, 2 * addM);
+      // double addD = 22;
+      // Rectangle2D destination = new Rectangle2D.Double(point.getX() - addD, point.getY() - addD, 2 * addD, 2 * addD);
+
+      // double addM = 16;
+      // Rectangle2D me = new Rectangle2D.Double(myX - addM, myY - addM, 2 * addM, 2 * addM);
 
 
-      if (objects.blocked(destination) || objects.blocked(path)) {
+      if (objects.blockedShadow(path)) {
          return Double.POSITIVE_INFINITY;
-      } else {
-         if (!objects.blocked(me)) {
-            for (int i = 0; i < 4; i++) {
-               if (objects.blocked(cornerPaths[i]))
-                  return Double.POSITIVE_INFINITY;
-            }
-         }
       }
 
 
@@ -153,9 +142,6 @@ public class MinimumRiskPoint {
             // continue;
             // }
             boolean intersects = path.intersects(r.getRectangle());
-            for (int i = 0; !intersects && i < 4; i++) {
-               intersects = cornerPaths[i].intersects(r.getRectangle());
-            }
 
             if (intersects) {
                return Double.POSITIVE_INFINITY;
@@ -163,7 +149,7 @@ public class MinimumRiskPoint {
                double robotRisk = BOT_RISK;
                if (!(r instanceof TeammateData)) {
                   robotRisk += r.getEnergy();
-                  robotRisk *= (1 + Math.abs(Utils.cosd(angle - Utils.angle(myX, myY, r.getX(), r.getY()))));
+                  robotRisk *= (1 + Math.abs(Trig.t_cos(angle - Utils.angle(myX, myY, r.getX(), r.getY()))));
                   // if (r.getTime() + 10 < time) {
                   // robotRisk *= (r.getTime() + 10 - time);
                   // }
@@ -202,27 +188,27 @@ public class MinimumRiskPoint {
 
 
 
-      RGraphics grid = new RGraphics(robot.getGraphics(), robot);
+      // RGraphics grid = new RGraphics(robot.getGraphics(), robot);
 
-      grid.setColor(Color.RED);
-      if (!objects.blocked(path))
-         grid.setColor(Color.GREEN);
-      grid.draw(path);
+      // grid.setColor(Color.RED);
+      // if (!objects.blocked(path))
+      // grid.setColor(Color.GREEN);
+      // grid.draw(path);
 
       // grid.draw(cornerPaths[0]);
       // grid.draw(cornerPaths[1]);
       // grid.draw(cornerPaths[2]);
       // grid.draw(cornerPaths[3]);
 
-      grid.setColor(Color.RED);
-      if (!objects.blocked(destination))
-         grid.setColor(Color.GREEN);
-      grid.draw(destination);
+      // grid.setColor(Color.RED);
+      // if (!objects.blocked(destination))
+      // grid.setColor(Color.GREEN);
+      // grid.draw(destination);
 
-      grid.setColor(Color.RED);
-      if (!objects.blocked(me))
-         grid.setColor(Color.GREEN);
-      grid.draw(me);
+      // grid.setColor(Color.RED);
+      // if (!objects.blocked(me))
+      // grid.setColor(Color.GREEN);
+      // grid.draw(me);
 
       return pointRisk;
    }

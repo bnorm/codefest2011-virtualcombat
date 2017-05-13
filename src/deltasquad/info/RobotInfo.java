@@ -4,14 +4,14 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 
-import deltasquad.robot.RobotData;
-import deltasquad.robot.RobotVector;
-import deltasquad.utils.Utils;
-
 import robocode.AdvancedRobot;
 import robocode.Robot;
 import robocode.Rules;
 import robocode.TeamRobot;
+import deltasquad.robot.RobotData;
+import deltasquad.robot.RobotVector;
+import deltasquad.utils.Trig;
+import deltasquad.utils.Utils;
 
 // BORED perfect documentation
 
@@ -331,7 +331,7 @@ public class RobotInfo implements Cloneable, Serializable {
     * @return the angle to the coordinates
     */
    public final double angle(final double x, final double y) {
-      double theta = Utils.atan2d(x - this.getX(), y - this.getY());
+      double theta = Trig.d_atan2(x - this.getX(), y - this.getY());
       return Utils.relative(theta);
    }
 

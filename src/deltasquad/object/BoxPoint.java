@@ -2,6 +2,8 @@ package deltasquad.object;
 
 import java.io.Serializable;
 
+import deltasquad.utils.Utils;
+
 public class BoxPoint implements Serializable {
    private static final long serialVersionUID = -2237448984421612107L;
    public double             x_;
@@ -11,7 +13,7 @@ public class BoxPoint implements Serializable {
    public BoxPoint(double x, double y, double sightAngle) {
       x_ = x;
       y_ = y;
-      sightAngle_ = sightAngle;
+      sightAngle_ = Utils.relative(sightAngle);
    }
 
    public boolean near(BoxPoint p) {
@@ -19,8 +21,7 @@ public class BoxPoint implements Serializable {
    }
 
    public boolean near(BoxPoint p, double dist) {
-      return (Math.abs(x_ - p.x_) <= dist && Math.abs(y_ - p.y_) < 2.0)
-            || (Math.abs(y_ - p.y_) <= dist && Math.abs(x_ - p.x_) < 2.0);
+      return Math.abs(x_ - p.x_) <= dist && Math.abs(y_ - p.y_) <= dist;
    }
 
    @Override

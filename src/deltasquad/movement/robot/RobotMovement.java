@@ -5,6 +5,7 @@ import java.awt.geom.Point2D;
 import deltasquad.info.RobotInfo;
 import deltasquad.robot.RobotData;
 import deltasquad.robot.RobotVector;
+import deltasquad.utils.Trig;
 import deltasquad.utils.Utils;
 
 import robocode.AdvancedRobot;
@@ -17,15 +18,15 @@ import robocode.Robot;
  */
 public class RobotMovement {
 
-   private Robot robot;
-   private AdvancedRobot advancedRobot;
+   private Robot               robot;
+   private AdvancedRobot       advancedRobot;
 
-   private RobotInfo info;
+   private RobotInfo           info;
 
    /**
     * The <code>integer</code> representation of forwards.
     */
-   public static final int FORWARD = 1;
+   public static final int     FORWARD        = 1;
 
    /**
     * The <code>integer</code> representation of backwards. This is also just the negative of
@@ -33,7 +34,7 @@ public class RobotMovement {
     * 
     * @see #FORWARD
     */
-   public static final int BACKWARD = -FORWARD;
+   public static final int     BACKWARD       = -FORWARD;
 
    private static final double MAX_DIST_RATIO = 1.75D;
    private static final double MIN_DIST_RATIO = 0.25D;
@@ -196,8 +197,8 @@ public class RobotMovement {
    /**
     * Makes the robot turn perpendicular to an angle with distance control before returning.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep a certain point at
-    * a set distance. This point is loosely defined as the angle and the distance you are from it.
+    * Distance control will allow the robot to move in such a way that will keep a certain point at a set distance. This
+    * point is loosely defined as the angle and the distance you are from it.
     * 
     * @param angle
     *           - the angle.
@@ -216,8 +217,8 @@ public class RobotMovement {
    /**
     * Sets the robot to turn perpendicular to an angle with distance control.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep a certain point at
-    * a set distance. This point is loosely defined as the angle and the distance you are from it.<br>
+    * Distance control will allow the robot to move in such a way that will keep a certain point at a set distance. This
+    * point is loosely defined as the angle and the distance you are from it.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.<br>
@@ -227,9 +228,9 @@ public class RobotMovement {
     * <pre>
     * class TestRobot extends AdvancedRobot {
     * 
-    *    RobotData enemy = new EnemyData();
+    *    RobotData     enemy = new EnemyData();
     *    RobotMovement movement;
-    *    RobotInfo info;
+    *    RobotInfo     info;
     * 
     *    void run() {
     * 
@@ -268,16 +269,15 @@ public class RobotMovement {
    /**
     * Makes the robot turn to an angle before returning.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise. Some example code may help in understanding how to use the
-    * return value of this method:
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise. Some example code may help in understanding how to use the return value of this method:
     * 
     * <pre>
     * class TestRobot extends AdvancedRobot {
     * 
-    *    RobotData enemy = new EnemyData();
+    *    RobotData     enemy = new EnemyData();
     *    RobotMovement movement;
-    *    RobotInfo info;
+    *    RobotInfo     info;
     * 
     *    void run() {
     * 
@@ -320,8 +320,8 @@ public class RobotMovement {
    /**
     * Sets the robot to turn to an angle.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -346,8 +346,8 @@ public class RobotMovement {
    /**
     * Makes the robot turn perpendicular to an angle before returning.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise.
     * 
     * @param angle
     *           - the angle.
@@ -363,8 +363,8 @@ public class RobotMovement {
    /**
     * Sets the robot to turn perpendicular to an angle.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -383,13 +383,12 @@ public class RobotMovement {
    /**
     * Makes the robot turn perpendicular to an angle with distance control before returning.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep a certain point at
-    * a set distance. This point is loosely defined as the angle and the distance you are from it.<br>
+    * Distance control will allow the robot to move in such a way that will keep a certain point at a set distance. This
+    * point is loosely defined as the angle and the distance you are from it.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise. Best used by multiplying it by the moving distance and moving
-    * forward that distance. This will move the robot into an arc around the robot that is exactly
-    * <code>desiredDist</code> away.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise. Best used by multiplying it by the moving distance and moving forward that distance. This will move the
+    * robot into an arc around the robot that is exactly <code>desiredDist</code> away.
     * 
     * @param angle
     *           - the angle.
@@ -419,13 +418,12 @@ public class RobotMovement {
    /**
     * Sets the robot to turn perpendicular to an angle with distance control.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep a certain point at
-    * a set distance. This point is loosely defined as the angle and the distance you are from it.<br>
+    * Distance control will allow the robot to move in such a way that will keep a certain point at a set distance. This
+    * point is loosely defined as the angle and the distance you are from it.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the angle,
-    * <code>BACKWARD</code> otherwise. Best used by multiplying it by the moving distance and moving
-    * forward that distance. This will move the robot into an arc around the robot that is exactly
-    * <code>desiredDist</code> away.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the angle, <code>BACKWARD</code>
+    * otherwise. Best used by multiplying it by the moving distance and moving forward that distance. This will move the
+    * robot into an arc around the robot that is exactly <code>desiredDist</code> away.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -477,11 +475,11 @@ public class RobotMovement {
    /**
     * Sets the robot to turn perpendicular to an angle with distance control and robot monitoring.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep a certain point at
-    * a set distance. This point is loosely defined as the angle and the distance you are from it.<br>
+    * Distance control will allow the robot to move in such a way that will keep a certain point at a set distance. This
+    * point is loosely defined as the angle and the distance you are from it.<br>
     * <br>
-    * Robot monitoring will allow the robot to move forward or backward and still keep
-    * <code>disiredDist</code> away from the angle.<br>
+    * Robot monitoring will allow the robot to move forward or backward and still keep <code>disiredDist</code> away
+    * from the angle.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -569,8 +567,8 @@ public class RobotMovement {
    /**
     * Makes the robot turn to a coordinate <code>(x, y)</code> before returning.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate,
-    * <code>BACKWARD</code> otherwise.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate, <code>BACKWARD</code>
+    * otherwise.
     * 
     * @param x
     *           - the <code>x</code> value of the coordinate.
@@ -588,8 +586,8 @@ public class RobotMovement {
    /**
     * Sets the robot to turn to a coordinate <code>(x, y)</code>.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate,
-    * <code>BACKWARD</code> otherwise.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate, <code>BACKWARD</code>
+    * otherwise.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -610,8 +608,8 @@ public class RobotMovement {
    /**
     * Makes the robot turn perpendicular to a coordinate <code>(x, y)</code> before returning.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate,
-    * <code>BACKWARD</code> otherwise.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate, <code>BACKWARD</code>
+    * otherwise.
     * 
     * @param x
     *           - the <code>x</code> value of the coordinate.
@@ -629,8 +627,8 @@ public class RobotMovement {
    /**
     * Sets the robot to turn perpendicular to a coordinate <code>(x, y)</code>.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate,
-    * <code>BACKWARD</code> otherwise.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate, <code>BACKWARD</code>
+    * otherwise.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -649,16 +647,13 @@ public class RobotMovement {
    }
 
    /**
-    * Makes the robot turn perpendicular to a coordinate <code>(x, y)</code> with distance control
-    * before returning.<br>
+    * Makes the robot turn perpendicular to a coordinate <code>(x, y)</code> with distance control before returning.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep the coordinate at a
-    * set distance.<br>
+    * Distance control will allow the robot to move in such a way that will keep the coordinate at a set distance.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate,
-    * <code>BACKWARD</code> otherwise. Best used by multiplying it by the moving distance and moving
-    * forward that distance. This will move the robot into an arc around the robot that is exactly
-    * <code>desiredDist</code> away.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate, <code>BACKWARD</code>
+    * otherwise. Best used by multiplying it by the moving distance and moving forward that distance. This will move the
+    * robot into an arc around the robot that is exactly <code>desiredDist</code> away.
     * 
     * @param x
     *           - the <code>x</code> value of the coordinate.
@@ -676,16 +671,13 @@ public class RobotMovement {
    }
 
    /**
-    * Sets the robot to turn perpendicular to a coordinate <code>(x, y)</code> with distance
-    * control.<br>
+    * Sets the robot to turn perpendicular to a coordinate <code>(x, y)</code> with distance control.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep the coordinate at a
-    * set distance.<br>
+    * Distance control will allow the robot to move in such a way that will keep the coordinate at a set distance.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate,
-    * <code>BACKWARD</code> otherwise. Best used by multiplying it by the moving distance and moving
-    * forward that distance. This will move the robot into an arc around the robot that is exactly
-    * <code>desiredDist</code> away.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the coordinate, <code>BACKWARD</code>
+    * otherwise. Best used by multiplying it by the moving distance and moving forward that distance. This will move the
+    * robot into an arc around the robot that is exactly <code>desiredDist</code> away.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -706,14 +698,13 @@ public class RobotMovement {
    }
 
    /**
-    * Sets the robot to turn perpendicular to a coordinate <code>(x, y)</code> with distance control
-    * and robot monitoring.<br>
+    * Sets the robot to turn perpendicular to a coordinate <code>(x, y)</code> with distance control and robot
+    * monitoring.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep the coordinate at a
-    * set distance.<br>
+    * Distance control will allow the robot to move in such a way that will keep the coordinate at a set distance.<br>
     * <br>
-    * Robot monitoring will allow the robot to move forward or backward and still keep
-    * <code>disiredDist</code> away from the coordinate.<br>
+    * Robot monitoring will allow the robot to move forward or backward and still keep <code>disiredDist</code> away
+    * from the coordinate.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -756,7 +747,10 @@ public class RobotMovement {
     *           - the <code>y</code> value of the coordinate.
     */
    public final void setMoveToXY(double x, double y) {
-      this.setAhead(info.dist(x, y) * setTurnToXYwBF(x, y));
+      double dir = setTurnToXYwBF(x, y);
+      if (Math.abs(info.getTurnRemaining()) < info.getTurnRate()) {
+         this.setAhead(info.dist(x, y) * dir);
+      }
    }
 
    /**
@@ -816,8 +810,8 @@ public class RobotMovement {
    /**
     * Makes the robot turn to another robot before returning.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot,
-    * <code>BACKWARD</code> otherwise.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot, <code>BACKWARD</code>
+    * otherwise.
     * 
     * @param robot
     *           - the other robot.
@@ -834,8 +828,8 @@ public class RobotMovement {
    /**
     * Sets the robot to turn to another robot.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot,
-    * <code>BACKWARD</code> otherwise.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot, <code>BACKWARD</code>
+    * otherwise.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -855,8 +849,8 @@ public class RobotMovement {
    /**
     * Makes the robot turn perpendicular to another robot before returning.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot,
-    * <code>BACKWARD</code> otherwise.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot, <code>BACKWARD</code>
+    * otherwise.
     * 
     * @param robot
     *           - the other robot.
@@ -873,8 +867,8 @@ public class RobotMovement {
    /**
     * Sets the robot to turn perpendicular to another robot.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot,
-    * <code>BACKWARD</code> otherwise.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot, <code>BACKWARD</code>
+    * otherwise.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -894,13 +888,11 @@ public class RobotMovement {
    /**
     * Makes the robot turn perpendicular to another robot with distance control before returning.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep the other robot at
-    * a set distance.<br>
+    * Distance control will allow the robot to move in such a way that will keep the other robot at a set distance.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot,
-    * <code>BACKWARD</code> otherwise. Best used by multiplying it by the moving distance and moving
-    * forward that distance. This will move the robot into an arc around the robot that is exactly
-    * <code>desiredDist</code> away.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot, <code>BACKWARD</code>
+    * otherwise. Best used by multiplying it by the moving distance and moving forward that distance. This will move the
+    * robot into an arc around the robot that is exactly <code>desiredDist</code> away.
     * 
     * @param robot
     *           - the other robot.
@@ -918,13 +910,11 @@ public class RobotMovement {
    /**
     * Sets the robot to turn perpendicular to another robot with distance control.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep the other robot at
-    * a set distance.<br>
+    * Distance control will allow the robot to move in such a way that will keep the other robot at a set distance.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot,
-    * <code>BACKWARD</code> otherwise. Best used by multiplying it by the moving distance and moving
-    * forward that distance. This will move the robot into an arc around the robot that is exactly
-    * <code>desiredDist</code> away.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the other robot, <code>BACKWARD</code>
+    * otherwise. Best used by multiplying it by the moving distance and moving forward that distance. This will move the
+    * robot into an arc around the robot that is exactly <code>desiredDist</code> away.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -943,14 +933,12 @@ public class RobotMovement {
    }
 
    /**
-    * Sets the robot to turn perpendicular to another robot with distance control and robot
-    * monitoring.<br>
+    * Sets the robot to turn perpendicular to another robot with distance control and robot monitoring.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep the other robot at
-    * a set distance.<br>
+    * Distance control will allow the robot to move in such a way that will keep the other robot at a set distance.<br>
     * <br>
-    * Robot monitoring will allow the robot to move forward or backward and still keep
-    * <code>disiredDist</code> away from the other robot.<br>
+    * Robot monitoring will allow the robot to move forward or backward and still keep <code>disiredDist</code> away
+    * from the other robot.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute() }</code> is called.
@@ -1024,8 +1012,8 @@ public class RobotMovement {
    /**
     * Makes the robot turn to a point before returning.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise.
     * 
     * @param point
     *           - the point.
@@ -1042,8 +1030,8 @@ public class RobotMovement {
    /**
     * Sets the robot to turn to a point.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -1063,8 +1051,8 @@ public class RobotMovement {
    /**
     * Makes the robot turn perpendicular to a point before returning.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise.
     * 
     * @param point
     *           - the point.
@@ -1081,8 +1069,8 @@ public class RobotMovement {
    /**
     * Sets the robot to turn perpendicular to a point.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute()}</code> is called.
@@ -1102,13 +1090,11 @@ public class RobotMovement {
    /**
     * Makes the robot turn perpendicular to a point with distance control before returning.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep the point at a set
-    * distance.<br>
+    * Distance control will allow the robot to move in such a way that will keep the point at a set distance.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise. Best used by multiplying it by the moving distance and moving
-    * forward that distance. This will move the robot into an arc around the robot that is exactly
-    * <code>desiredDist</code> away.
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise. Best used by multiplying it by the moving distance and moving forward that distance. This will move the
+    * robot into an arc around the robot that is exactly <code>desiredDist</code> away.
     * 
     * @param point
     *           - the point.
@@ -1126,13 +1112,11 @@ public class RobotMovement {
    /**
     * Sets the robot to turn perpendicular to a point with distance control.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep the point at a set
-    * distance.<br>
+    * Distance control will allow the robot to move in such a way that will keep the point at a set distance.<br>
     * <br>
-    * Will return <code>FORWARD</code> if the front of the robot was turned to the point,
-    * <code>BACKWARD</code> otherwise. Best used by multiplying it by the moving distance and moving
-    * forward that distance. This will move the robot into an arc around the robot that is exactly
-    * <code>desiredDist</code> away.<br>
+    * Will return <code>FORWARD</code> if the front of the robot was turned to the point, <code>BACKWARD</code>
+    * otherwise. Best used by multiplying it by the moving distance and moving forward that distance. This will move the
+    * robot into an arc around the robot that is exactly <code>desiredDist</code> away.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute() }</code> is called.
@@ -1153,11 +1137,10 @@ public class RobotMovement {
    /**
     * Sets the robot to turn perpendicular to a point with distance control and robot monitoring.<br>
     * <br>
-    * Distance control will allow the robot to move in such a way that will keep the point at a set
-    * distance.<br>
+    * Distance control will allow the robot to move in such a way that will keep the point at a set distance.<br>
     * <br>
-    * Robot monitoring will allow the robot to move forward or backward and still keep
-    * <code>disiredDist</code> away from the point.<br>
+    * Robot monitoring will allow the robot to move forward or backward and still keep <code>disiredDist</code> away
+    * from the point.<br>
     * <br>
     * Will return before turning even commences, turning will happen when
     * <code>{@link robocode.AdvancedRobot#execute() execute() }</code> is called.
@@ -1304,8 +1287,8 @@ public class RobotMovement {
       }
 
       /**
-       * The other thing that effects whether or not the robot's heading is adjusted is whether or
-       * not the robot's heading is in between two angles. again this is best shown be the figure:
+       * The other thing that effects whether or not the robot's heading is adjusted is whether or not the robot's
+       * heading is in between two angles. again this is best shown be the figure:
        * 
        * <pre>
        * 
@@ -1328,8 +1311,7 @@ public class RobotMovement {
        * 
        * </pre>
        * 
-       * If the robot's heading is between the right and left danger angles then the robot's heading
-       * will be adjusted.
+       * If the robot's heading is between the right and left danger angles then the robot's heading will be adjusted.
        */
       double dangerAngle = Utils.absolute(rightAngle - leftAngle);
       if (TWO_WALLS
@@ -1436,11 +1418,11 @@ public class RobotMovement {
    }
 
    /**
-    * Returns the distance ratio of the the current distance (<code>dist</code>) and the desired
-    * distance ( <code>disiredDist</code>).<br>
+    * Returns the distance ratio of the the current distance (<code>dist</code>) and the desired distance (
+    * <code>disiredDist</code>).<br>
     * <br>
-    * The value will be less then one when the robot must move farther away to achieve the desired
-    * distance, and greater then one when the opposite is true.<br>
+    * The value will be less then one when the robot must move farther away to achieve the desired distance, and greater
+    * then one when the opposite is true.<br>
     * <br>
     * The maximum this value will be is: {@value MAX_DIST_RATIO}<br>
     * The minimum this value will be is: {@value MIN_DIST_RATIO}
@@ -1459,10 +1441,10 @@ public class RobotMovement {
    private static final double wallOffsetAngle(final double distFromWall, final double turnRadius) {
       double offsetAngle;
       if (turnRadius > distFromWall) {
-         offsetAngle = Utils.acosd(distFromWall / turnRadius);
+         offsetAngle = Trig.d_acos(distFromWall / turnRadius);
          offsetAngle = (turnRadius == 0.0D ? 0.0D : offsetAngle);
       } else {
-         offsetAngle = -Utils.acosd((2 * turnRadius - distFromWall) / turnRadius);
+         offsetAngle = -Trig.d_acos((2 * turnRadius - distFromWall) / turnRadius);
          offsetAngle = (distFromWall == 0.0D ? 0.0D : offsetAngle);
       }
       return offsetAngle;

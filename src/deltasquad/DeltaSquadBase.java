@@ -109,7 +109,7 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
             wasSeeker = false;
          }
 
-         setTurnRadarRight(30); // Utils.EIGHTIETH_CIRCLE / 2 + 5);
+         setTurnRadarRight(44); // Utils.EIGHTIETH_CIRCLE / 2 + 5);
          if (getGunHeat() < .4 || getOthers() == 1)
             radar.setSweep(enemy, Utils.EIGHTIETH_CIRCLE / 3);
 
@@ -146,7 +146,10 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
       double y = getY();
 
       EnemyData enemy = this.enemy;
-      double distSq = Utils.distSq(x, y, enemy.getX(), enemy.getY()) * 0.9;
+      double distSq = Double.POSITIVE_INFINITY;
+      if (!enemy.isDead()) {
+         distSq = Utils.distSq(x, y, enemy.getX(), enemy.getY()) * 0.9;
+      }
 
       for (EnemyData e : robots.getEnemies()) {
          if (!e.isDead()) {
@@ -169,8 +172,8 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
          double dist = Utils.dist(x, y, enemy.getX(), enemy.getY());
          double angle = getGunHeading();
          Line2D line = new Line2D.Double(x, y, Utils.getX(x, dist, angle), Utils.getY(y, dist, angle));
-         getGraphics().setColor(Color.RED);
-         getGraphics().draw(line);
+         // getGraphics().setColor(Color.RED);
+         // getGraphics().draw(line);
          return fire && !objects.blocked(line);
       } else {
          return enemy.distSq(getX(), getY()) < 40000
@@ -227,8 +230,8 @@ public class DeltaSquadBase extends CaptureTheFlagApi {
 
    @Override
    public void onPaint(Graphics2D graphics) {
-      if (getTime() < 10)
-         return;
+      // if (getTime() < 10)
+      // return;
       RGraphics grid = new RGraphics(graphics, this);
       DrawMenu.draw(grid);
       robots.draw(grid);

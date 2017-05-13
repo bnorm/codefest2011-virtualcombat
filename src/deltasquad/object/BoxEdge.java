@@ -2,113 +2,244 @@ package deltasquad.object;
 
 import java.awt.geom.Line2D;
 
-public class BoxEdge extends Line2D.Double {
-   private static final long serialVersionUID = -2461145688771462782L;
+public abstract class BoxEdge extends Line2D.Double {
+   private static final long  serialVersionUID = -2461145688771462782L;
 
-   private boolean           virtical_;
-   private double            maxX;
-   private double            minX;
-   private double            maxY;
-   private double            minY;
+   public static final double WIDTH_TOLERANCE  = 1.0;
+   public static final double SHADOW_LENGTH    = 14.0;
 
-   BoxPoint                  start;
-   BoxPoint                  end;
+   private BoxPoint           start_;
+   private BoxPoint           end_;
+   protected Line2D           shadowLine_;
 
-   public BoxEdge(BoxPoint p1, BoxPoint p2) {
-      init(p1, p2);
-   }
-
-   private void init(BoxPoint p1, BoxPoint p2) {
+   public static BoxEdge createEdge(BoxPoint p1, BoxPoint p2, boolean minEnded, boolean maxEnded) {
       if (p1.near(p2)) {
-         double x1 = p1.x_, y1 = p1.y_, x2 = p2.x_, y2 = p2.y_;
-         if (Math.abs(x1 - x2) < 2.0) {
-            virtical_ = true;
-            x1 = x2 = (x1 + x2) / 2.0;
-         } else {
-            virtical_ = false;
-            y1 = y2 = (y1 + y2) / 2.0;
-         }
-         maxX = Math.max(x1, x2);
-         minX = Math.min(x1, x2);
-         maxY = Math.max(y1, y2);
-         minY = Math.min(y1, y2);
+         boolean virtical = false;
+         boolean horizontal = false;
 
-         start = new BoxPoint(minX, minY, 0);
-         end = new BoxPoint(maxX, maxY, 0);
-         setLine(minX, minY, maxX, maxY);
+         if (Math.abs(p1.x_ - p2.x_) < WIDTH_TOLERANCE) {
+            virtical = true;
+         }
+         if (Math.abs(p1.y_ - p2.y_) < WIDTH_TOLERANCE) {
+            horizontal = true;
+         }
+         if (virtical && !horizontal) {
+            return new Virtical(p1, p2, minEnded, maxEnded);
+         }
+         if (horizontal && !virtical) {
+            return new Horizontal(p1, p2, minEnded, maxEnded);
+         }
       }
+      return null;
    }
 
-   public void extend(BoxPoint p) {
-      if (virtical_ && Math.abs(minX - p.x_) < 2.0) {
-         if (p.y_ > maxY) {
-            maxY = p.y_;
-         } else if (p.y_ < minY) {
-            minY = p.y_;
-         }
-         minX = maxX = (minX + maxX + p.x_) / 3.0;
-
-         start = new BoxPoint(minX, minY, 0);
-         end = new BoxPoint(maxX, maxY, 0);
-         setLine(minX, minY, maxX, maxY);
-      } else if (!virtical_ && Math.abs(minY - p.y_) < 2.0) {
-         if (p.x_ > maxX) {
-            maxX = p.x_;
-         } else if (p.x_ < minX) {
-            minX = p.x_;
-         }
-         minY = maxY = (minY + maxY + p.y_) / 3.0;
-
-         start = new BoxPoint(minX, minY, 0);
-         end = new BoxPoint(maxX, maxY, 0);
-         setLine(minX, minY, maxX, maxY);
-      }
+   public Line2D getLineShadow() {
+      return shadowLine_;
    }
 
-   public boolean extend(BoxEdge e) {
-      if (virtical_ && e.virtical_ && Math.abs(minX - e.minX) < 2.0) {
-         minX = Math.min(minX, e.minX);
-         maxX = Math.max(maxX, e.maxX);
-         minY = Math.min(minY, e.minY);
-         maxY = Math.max(maxY, e.maxY);
+   public abstract Line2D getLineShadow(double buffer);
 
-         minX = maxX = (minX + maxX) / 2.0;
+   public abstract boolean extend(BoxPoint p, boolean ended);
 
-         start = new BoxPoint(minX, minY, 0);
-         end = new BoxPoint(maxX, maxY, 0);
-         setLine(minX, minY, maxX, maxY);
-         return true;
-      } else if (!virtical_ && !e.virtical_ && Math.abs(minY - e.minY) < 2.0) {
-         minX = Math.min(minX, e.minX);
-         maxX = Math.max(maxX, e.maxX);
-         minY = Math.min(minY, e.minY);
-         maxY = Math.max(maxY, e.maxY);
-
-         minY = maxY = (minY + maxY) / 2.0;
-
-         start = new BoxPoint(minX, minY, 0);
-         end = new BoxPoint(maxX, maxY, 0);
-         setLine(minX, minY, maxX, maxY);
-         return true;
-      }
-      return false;
-   }
+   public abstract boolean extend(BoxEdge e);
 
    public boolean near(BoxPoint p) {
-      return p != null && (start.near(p) || end.near(p));
+      return p != null && (start_.near(p) || end_.near(p));
    }
 
    @Override
-   public boolean contains(double x, double y) {
-      if (virtical_) {
-         return (Math.abs(minX - x) < 2.0 && y < maxY && y > minY);
-      } else {
-         return (Math.abs(minY - y) < 2.0 && x < maxX && x > minX);
-      }
-   }
+   public abstract boolean contains(double x, double y);
 
    public boolean contains(BoxPoint p) {
       return contains(p.x_, p.y_);
+   }
+
+   @Override
+   public void setLine(double x1, double y1, double x2, double y2) {
+      start_ = new BoxPoint(x1, y1, 0);
+      end_ = new BoxPoint(x2, y2, 0);
+      super.setLine(x1, y1, x2, y2);
+   }
+
+   public boolean inside(BoxEdge edge) {
+      return contains(edge.start_) && contains(edge.end_);
+   }
+
+   private static class Virtical extends BoxEdge {
+      private static final long serialVersionUID = -2461145688771462783L;
+
+      private double            x_;
+      private boolean           shadow_          = false;                // false = left, true = right
+
+      private double            minY_;
+      private double            maxY_;
+
+      private boolean           minEnded_        = false;
+      private boolean           maxEnded_        = false;
+
+      public Virtical(BoxPoint p1, BoxPoint p2, boolean minEnded, boolean maxEnded) {
+         x_ = (p1.x_ + p2.x_) / 2.0;
+         shadow_ = p1.sightAngle_ < 0;
+
+         minY_ = Math.min(p1.y_, p2.y_);
+         maxY_ = Math.max(p1.y_, p2.y_);
+
+         minEnded_ = minEnded;
+         maxEnded_ = maxEnded;
+
+         setLine(x_, minY_, x_, maxY_);
+         shadowLine_ = getLineShadow(SHADOW_LENGTH);
+      }
+
+      @Override
+      public Line2D getLineShadow(double buffer) {
+         double dx = (shadow_ ? 1 : -1) * buffer;
+         return new Line2D.Double(x_ + dx, minY_ - buffer, x_ + dx, maxY_ + buffer);
+      }
+
+      @Override
+      public boolean extend(BoxPoint p, boolean ended) {
+         boolean extended = false;
+         if (this.near(p) && Math.abs(x_ - p.x_) < WIDTH_TOLERANCE) {
+            if (!maxEnded_ && p.y_ > maxY_) {
+               maxY_ = p.y_;
+               maxEnded_ = ended;
+               extended = true;
+            } else if (!minEnded_ && p.y_ < minY_) {
+               minY_ = p.y_;
+               minEnded_ = ended;
+               extended = true;
+            }
+
+            if (extended) {
+               x_ = (x_ + p.x_) / 2.0;
+               setLine(x_, minY_, x_, maxY_);
+               shadowLine_ = getLineShadow(SHADOW_LENGTH);
+            }
+         }
+         return extended;
+      }
+
+      @Override
+      public boolean extend(BoxEdge edge) {
+         boolean extended = false;
+         if (edge instanceof Virtical) {
+            Virtical virt = (Virtical) edge;
+            if (Math.abs(x_ - virt.x_) < WIDTH_TOLERANCE) {
+               if (!minEnded_ && virt.minY_ < minY_) {
+                  minY_ = virt.minY_;
+                  minEnded_ = virt.minEnded_;
+                  extended = true;
+               }
+               if (!maxEnded_ && virt.maxY_ > maxY_) {
+                  maxY_ = virt.maxY_;
+                  maxEnded_ = virt.maxEnded_;
+                  extended = true;
+               }
+
+               if (extended) {
+                  x_ = (x_ + virt.x_) / 2.0;
+                  setLine(x_, minY_, x_, maxY_);
+                  shadowLine_ = getLineShadow(SHADOW_LENGTH);
+               }
+            }
+         }
+         return extended;
+      }
+
+      @Override
+      public boolean contains(double x, double y) {
+         return (Math.abs(x_ - x) < 2.0 * WIDTH_TOLERANCE && y <= maxY_ && y >= minY_);
+      }
+
+   }
+
+   private static class Horizontal extends BoxEdge {
+      private static final long serialVersionUID = -2461145688771462784L;
+
+      private double            y_;
+      private boolean           shadow_          = false;                // false = bottom, true = top
+
+      private double            minX_;
+      private double            maxX_;
+
+      private boolean           minEnded_        = false;
+      private boolean           maxEnded_        = false;
+
+      public Horizontal(BoxPoint p1, BoxPoint p2, boolean minEnded, boolean maxEnded) {
+         y_ = (p1.y_ + p2.y_) / 2.0;
+         shadow_ = Math.abs(p1.sightAngle_) > 90.0;
+
+         minX_ = Math.min(p1.x_, p2.x_);
+         maxX_ = Math.max(p1.x_, p2.x_);
+
+         minEnded_ = minEnded;
+         maxEnded_ = maxEnded;
+
+         setLine(minX_, y_, maxX_, y_);
+         shadowLine_ = getLineShadow(SHADOW_LENGTH);
+      }
+
+      @Override
+      public Line2D getLineShadow(double buffer) {
+         double dy = (shadow_ ? 1 : -1) * buffer;
+         return new Line2D.Double(minX_ - buffer, y_ + dy, maxX_ + buffer, y_ + dy);
+      }
+
+      @Override
+      public boolean extend(BoxPoint p, boolean ended) {
+         boolean extended = false;
+         if (this.near(p) && Math.abs(y_ - p.y_) < WIDTH_TOLERANCE) {
+            if (!maxEnded_ && p.x_ > maxX_) {
+               maxX_ = p.x_;
+               maxEnded_ = ended;
+               extended = true;
+            } else if (!minEnded_ && p.x_ < minX_) {
+               minX_ = p.x_;
+               minEnded_ = ended;
+               extended = true;
+            }
+
+            if (extended) {
+               y_ = (y_ + p.y_) / 2.0;
+               setLine(minX_, y_, maxX_, y_);
+               shadowLine_ = getLineShadow(SHADOW_LENGTH);
+            }
+         }
+         return extended;
+      }
+
+      @Override
+      public boolean extend(BoxEdge edge) {
+         boolean extended = false;
+         if (edge instanceof Horizontal) {
+            Horizontal horz = (Horizontal) edge;
+            if (Math.abs(y_ - horz.y_) < WIDTH_TOLERANCE) {
+               if (!minEnded_ && horz.minX_ < minX_) {
+                  minX_ = horz.minX_;
+                  minEnded_ = horz.minEnded_;
+                  extended = true;
+               }
+               if (!maxEnded_ && horz.maxX_ > maxX_) {
+                  maxX_ = horz.maxX_;
+                  maxEnded_ = horz.maxEnded_;
+                  extended = true;
+               }
+
+               if (extended) {
+                  y_ = (y_ + horz.y_) / 2.0;
+                  setLine(minX_, y_, maxX_, y_);
+                  shadowLine_ = getLineShadow(SHADOW_LENGTH);
+               }
+            }
+         }
+         return extended;
+      }
+
+      @Override
+      public boolean contains(double x, double y) {
+         return (Math.abs(y_ - y) < WIDTH_TOLERANCE && x <= maxX_ && x >= minX_);
+      }
    }
 
 }
